@@ -7,3 +7,5 @@ class Creator{
 
   }
 }
+
+export { Creator };
