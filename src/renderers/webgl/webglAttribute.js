@@ -23,6 +23,7 @@ class WebglAttribute {
     if (attributes === undefined) throw new Error( 'Attribute is undefined.' );
 
     for (let attr in attributes) {
+      // attr为着色器变量字符串
 
       const attrVal = attributes[attr]
 

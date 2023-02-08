@@ -57,6 +57,7 @@ class Renderer {
 
     // 渲染
     // this.gl.drawArrays(this.gl.TRIANGLES, 0, points.length / 2);
+    // this.gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 
   }
 }
