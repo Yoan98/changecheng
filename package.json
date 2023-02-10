@@ -10,6 +10,8 @@
     "build": "parcel build ./src/changcheng.js"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.12.5"
+    "eslint": "^8.7.0",
+    "parcel-bundler": "^1.12.5",
+    "prettier": "^2.5.1"
   }
 }

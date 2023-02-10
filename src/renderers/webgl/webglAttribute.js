@@ -1,10 +1,8 @@
 class WebglAttribute {
-
-  constructor(gl,program){
+  constructor(gl, program) {
     this._gl = gl
 
     this._program = program
-
   }
 
   /**
@@ -19,23 +17,28 @@ class WebglAttribute {
    * }
    * }
    */
-  setAttributesByPointer(attributes){
-    if (attributes === undefined) throw new Error( 'Attribute is undefined.' );
+  setAttributesByPointer(attributes) {
+    if (attributes === undefined) throw new Error('Attribute is undefined.')
 
     for (let attr in attributes) {
       // attr为着色器变量字符串
 
       const attrVal = attributes[attr]
 
-      const glVarIndex =  this._gl.getAttribLocation(this._program, attr);
+      const glVarIndex = this._gl.getAttribLocation(this._program, attr)
 
-      this._gl.vertexAttribPointer(glVarIndex, attrVal.size, attrVal.type, attrVal.normalized, attrVal.stride, attrVal.offset);
+      this._gl.vertexAttribPointer(
+        glVarIndex,
+        attrVal.size,
+        attrVal.type,
+        attrVal.normalized,
+        attrVal.stride,
+        attrVal.offset
+      )
 
-      this._gl.enableVertexAttribArray(glVarIndex);
+      this._gl.enableVertexAttribArray(glVarIndex)
     }
   }
-
-
 }
 
-export {WebglAttribute}
+export { WebglAttribute }
