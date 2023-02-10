@@ -6,6 +6,8 @@ class Mesh extends ObjectBase {
 
     this.geometry = {}
     this.material = {}
+
+    this.type = 'mesh'
   }
 
   setGeometryBuffer(

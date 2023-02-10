@@ -1,4 +1,4 @@
-class WebglBindStates {
+class WebglBindState {
   constructor(gl, program) {
     this._gl = gl
 
@@ -55,4 +55,4 @@ class WebglBindStates {
   }
 }
 
-export { WebglBindStates }
+export { WebglBindState }

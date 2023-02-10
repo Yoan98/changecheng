@@ -1,17 +1,17 @@
 class WebglProgram {
   constructor(gl) {
     this._gl = gl
-
-    this.program = gl.createProgram()
   }
 
-  useProgram(webglShader) {
-    this._gl.attachShader(this.program, webglShader.vertexShader)
-    this._gl.attachShader(this.program, webglShader.fragmentShader)
+  getProgram(webglShader) {
+    const glProgram = gl.createProgram()
 
-    this._gl.linkProgram(this.program)
+    this._gl.attachShader(glProgram, webglShader.vertexShader)
+    this._gl.attachShader(glProgram, webglShader.fragmentShader)
 
-    this._gl.useProgram(this.program)
+    this._gl.linkProgram(glProgram)
+
+    this._gl.useProgram(glProgram)
   }
 }
 

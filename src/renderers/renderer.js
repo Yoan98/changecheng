@@ -1,20 +1,23 @@
-import { WebglBuffer } from './webgl/WebglBuffer'
 import { WebglProgram } from './webgl/WebglProgram'
-import { WebglAttribute } from './webgl/WebglAttribute'
+import { WebglShader } from './webgl/WebglShader'
+import { WebglBindState } from './webgl/WebglBindState'
 
+import { SHADER_MAP } from './shader/ShaderMap'
 class Renderer {
   constructor(canvas) {
     this.gl = this.getContext(canvas)
+
+    this.curRenderLights = []
+    this.curRenderObjects = []
+    this.curCamera = {}
 
     this.initGlContext(this.gl)
   }
 
   initGlContext(gl) {
-    this._glBuffer = new WebglBuffer(gl)
+    this._program = new WebglProgram(gl)
 
-    this._glProgram = new WebglProgram(gl)
-
-    this._glAttribute = new WebglAttribute(gl.this._glProgram)
+    this._bindState = new WebglBindState(gl)
   }
 
   getContext(canvas, contextAttributes = {}) {
@@ -29,37 +32,56 @@ class Renderer {
     return null
   }
 
-  // 将灯光，材质，相机数据，融合成shader字符串
-  generateShader() {
-    // 根据材质获取shader字符（相当于不同材质，不同的公式，用于计算最终的像素颜色）
-    // 将灯光，材质颜色，相机数据融入shader字符串
-    // const vertexGlsl = versionString + prefixVertex + vertexShader
-    // const fragmentGlsl = versionString + prefixFragment + fragmentShader
+  generateShader(meshObject) {
+    const { material } = meshObject
+
+    const { vertex, fragment } = SHADER_MAP[material.shaderId]
+
+    meshObject.shader = {
+      vertex,
+      fragment,
+    }
   }
   render(scene, camera) {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT)
 
-    // 处理场景中的所有对象
-    // 获取顶点与片元着色器字符串(需要根据灯光与材质融合计算)
+    // 处理场景中的所有对象,进行相应的初始化，便于后面操作
+    // 后期优化过滤一些不需要显示的对象
+    scene.children.forEach((child) => {
+      if (child.type === 'mesh') {
+        this.curRenderObjects.push(child)
+      } else if (child.type === 'light') {
+        this.curRenderLights.push(child)
+      } else if (child.type === 'camera') {
+        this.curCamera = child
+      }
+    })
 
-    // 获取顶点以及片元着色器内相关的变量数据
-    // 获取顶点的所有数据
     // 注：一个对象对应一个program 一个shader 一个buffer 一次渲染
 
-    // 下面的操作要遍历对象执行
+    // 获取顶点与片元着色器字符串
+    this.curRenderObjects.forEach((meshObject) => {
+      this.generateShader(meshObject)
 
-    // 将顶点片元字符串，导入到shader中
-    // this.shader = new WebglShader(this.gl,vertex,fragment)
+      // 将顶点片元字符串，导入到shader中
+      this.shader = new WebglShader(
+        this.gl,
+        meshObject.vertex,
+        meshObject.fragment
+      )
 
-    // 传递shader对象，应用到program中
-    // this._glProgram.useProgram(this.shader)
+      // 传递shader对象，应用到program中
+      const glProgram = this._program.getProgram(this.shader)
 
-    // 将顶点的所有数据写入缓冲区，并关联到着色器中的变量
-    // this._glBuffer.writeBufferData(dataArr)
+      // 调用gl.getProgramParameter，获取该项目中所有shader变量，生成一个对象attribute(包含buffer数据)
 
-    // 渲染
-    // this.gl.drawArrays(this.gl.TRIANGLES, 0, points.length / 2);
-    // this.gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+      // 将数据写入缓冲区，同时应用到shader变量中
+      // this._bindState.writeDataToShader(attribute)
+
+      // 渲染
+      // this.gl.drawArrays(this.gl.TRIANGLES, 0, points.length / 2);
+      // this.gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+    })
   }
 }
 
