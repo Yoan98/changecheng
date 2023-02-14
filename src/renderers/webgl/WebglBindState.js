@@ -9,33 +9,40 @@ class WebglBindState {
   writeDataToShader(attributes) {
     if (attributes === undefined) throw new Error('Attribute is undefined.')
 
-    for (let attr in attributes) {
+    for (let name in attributes) {
       // attr为着色器变量字符串
 
-      const attrVal = attributes[attr]
+      const info = attributes[name]
 
-      const { shaderVarType, value, data } = attrVal
+      const { type, location, locationSize, value } = info
 
-      if (shaderVarType === 'Uniform') {
-        this._gl.uniform3f(attr, value.x, value.y, value.z)
-      } else if (shaderVarType === 'AttribPointer') {
+      if (type === 'Uniform') {
+        this._gl.uniform3f(
+          name,
+          value.uniform3f.x,
+          value.uniform3f.y,
+          value.uniform3f.z
+        )
+      } else if (type === 'AttribPointer') {
         const bufferId = this._gl.createBuffer()
 
         this._gl.bindBuffer(this._gl.ARRAY_BUFFER, bufferId)
-        this._gl.bufferData(this._gl.ARRAY_BUFFER, data, this._gl.STATIC_DRAW)
-
-        const glVarIndex = this._gl.getAttribLocation(this._program, attr)
-
-        this._gl.vertexAttribPointer(
-          glVarIndex,
-          value.size,
-          value.type,
-          value.normalized,
-          value.stride,
-          value.offset
+        this._gl.bufferData(
+          this._gl.ARRAY_BUFFER,
+          value.bufferData,
+          this._gl.STATIC_DRAW
         )
 
-        this._gl.enableVertexAttribArray(glVarIndex)
+        this._gl.vertexAttribPointer(
+          location,
+          value.vertexAttribPointer.size,
+          value.vertexAttribPointer.type,
+          value.vertexAttribPointer.normalized,
+          value.vertexAttribPointer.stride,
+          value.vertexAttribPointer.offset
+        )
+
+        this._gl.enableVertexAttribArray(location)
       }
     }
   }

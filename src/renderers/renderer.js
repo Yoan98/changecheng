@@ -42,6 +42,70 @@ class Renderer {
       fragment,
     }
   }
+  fetchAttributeLocations(gl, program) {
+    const attributes = {}
+
+    const n = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES)
+
+    for (let i = 0; i < n; i++) {
+      const info = gl.getActiveAttrib(program, i)
+      const name = info.name
+
+      let locationSize = 1
+      if (info.type === gl.FLOAT_MAT2) locationSize = 2
+      if (info.type === gl.FLOAT_MAT3) locationSize = 3
+      if (info.type === gl.FLOAT_MAT4) locationSize = 4
+
+      // console.log( 'THREE.WebGLProgram: ACTIVE VERTEX ATTRIBUTE:', name, i );
+
+      attributes[name] = {
+        type: info.type,
+        location: gl.getAttribLocation(program, name),
+        locationSize: locationSize,
+      }
+    }
+
+    return attributes
+  }
+
+  setAttributeSetting(attributes, meshObject, lights) {
+    const transformColorBuffer = (color) => {
+      // todo
+      return new Float32Array([])
+    }
+
+    const getValueByType = (name) => {
+      const value = {
+        vertexAttribPointer: {
+          size: 3,
+          type: gl.FLOAT,
+          normalized: false,
+          stride: 0,
+          offset: 0,
+        },
+        uniform3f: {
+          x: 0,
+          y: 0,
+          z: 0,
+        },
+        bufferData: new Float32Array([]),
+      }
+      if (name === 'a_Position') {
+        value[bufferData] = meshObject.geometry.vertices
+      } else if (name === 'a_Normal') {
+        value[bufferData] = meshObject.geometry.normals
+      } else if (name === 'a_Color') {
+        value[bufferData] = transformColorBuffer(meshObject.material.color)
+      } else if (name === 'u_LightColor') {
+        value[bufferData] = transformColorBuffer(lights[0].color)
+      }
+    }
+
+    for (let name in attributes) {
+      attributes[name].value = getValueByType(name)
+    }
+  }
+
   render(scene, camera) {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT)
 
@@ -59,24 +123,32 @@ class Renderer {
 
     // 注：一个对象对应一个program 一个shader 一个buffer 一次渲染
 
-    // 获取顶点与片元着色器字符串
     this.curRenderObjects.forEach((meshObject) => {
+      // 生成顶点与片元着色器字符串
       this.generateShader(meshObject)
 
-      // 将顶点片元字符串，导入到shader中
-      this.shader = new WebglShader(
+      const shader = new WebglShader(
         this.gl,
         meshObject.vertex,
         meshObject.fragment
       )
 
       // 传递shader对象，应用到program中
-      const glProgram = this._program.getProgram(this.shader)
+      const glProgram = this._program.getProgram(shader)
 
       // 调用gl.getProgramParameter，获取该项目中所有shader变量，生成一个对象attribute(包含buffer数据)
+      const attributes = this.fetchAttributeLocations(this.gl, glProgram)
+
+      // 将顶点灯光等数据以及数据应用方式对应到attribute中
+      setAttributeSetting(attributes, meshObject, this.curRenderLights)
 
       // 将数据写入缓冲区，同时应用到shader变量中
-      // this._bindState.writeDataToShader(attribute)
+      this._bindState.writeDataToShader(attributes)
+
+      if (meshObject.geometry.indices.length) {
+        // 设置索引
+        this._bindState.writeIndicesBufferData(meshObject.geometry.indices)
+      }
 
       // 渲染
       // this.gl.drawArrays(this.gl.TRIANGLES, 0, points.length / 2);

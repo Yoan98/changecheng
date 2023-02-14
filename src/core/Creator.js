@@ -107,8 +107,7 @@ class Creator {
       }
     }
 
-    const objectMesh = new Mesh()
-    objectMesh.setGeometryBuffer({
+    const objectMesh = new Mesh({
       indices,
       vertices,
       normals,

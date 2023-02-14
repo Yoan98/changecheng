@@ -1,28 +1,30 @@
 import { ObjectBase } from './ObjectBase.js'
 
 class Mesh extends ObjectBase {
-  constructor() {
+  constructor(geometryInfo) {
     super()
 
     this.geometry = {}
     this.material = {}
 
     this.type = 'mesh'
+
+    this.setGeometryBuffer(geometryInfo)
   }
 
   setGeometryBuffer(
-    bufferInfo = {
+    geometryInfo = {
       indices: [],
       vertices: [],
       normals: [],
       uvs: [],
     }
   ) {
-    for (let key in bufferInfo[key]) {
-      bufferInfo[key] = new Float32Array(bufferInfo[key])
+    for (let key in geometryInfo[key]) {
+      geometryInfo[key] = new Float32Array(geometryInfo[key])
     }
 
-    this.geometry = bufferInfo
+    this.geometry = geometryInfo
   }
 }
 
