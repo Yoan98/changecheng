@@ -1,6 +1,6 @@
 import { Color } from '../math/Color.js'
 
-class StanderMaterial {
+class StandardMaterial {
   constructor() {
     this.shaderId = 'stander'
 
@@ -8,4 +8,4 @@ class StanderMaterial {
   }
 }
 
-export { StanderMaterial }
+export { StandardMaterial }

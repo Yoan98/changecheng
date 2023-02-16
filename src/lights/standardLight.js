@@ -1,5 +1,6 @@
 import { ObjectBase } from './ObjectBase'
-class standerLight extends ObjectBase {
+import { Color } from '../math/Color.js'
+class standardLight extends ObjectBase {
   constructor() {
     this.type = 'standerLight'
 
@@ -7,4 +8,4 @@ class standerLight extends ObjectBase {
   }
 }
 
-export { standerLight }
+export { standardLight }

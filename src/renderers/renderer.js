@@ -1,7 +1,7 @@
 import { WebglProgram } from './webgl/WebglProgram'
 import { WebglShader } from './webgl/WebglShader'
 import { WebglBindState } from './webgl/WebglBindState'
-
+import { Matrix4 } from '../math/Matrix4.js'
 import { SHADER_MAP } from './shader/ShaderMap'
 class Renderer {
   constructor(canvas) {
@@ -68,36 +68,54 @@ class Renderer {
     return attributes
   }
 
-  setAttributeSetting(attributes, meshObject, lights) {
-    const transformColorBuffer = (color) => {
-      // todo
-      return new Float32Array([])
+  fetchUniformLocations(gl, program) {
+    const n = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)
+
+    const uniforms = {}
+
+    for (let i = 0; i < n; ++i) {
+      const info = gl.getActiveUniform(program, i)
+      const name = info.name
+
+      uniforms[name] = {
+        type: info.type,
+        location: gl.getUniformLocation(program, info.name),
+      }
+    }
+  }
+
+  // 后期优化多灯光问题
+  attributeSetting(attributes, meshObject, lights) {
+    const transformColorBuffer = (color, length) => {
+      let colorArr = []
+      for (let i = 0; i < length; i++) {
+        const rgbArr = color.toArray([])
+
+        colorArr = colorArr.concat(rgbArr)
+      }
+      return new Float32Array(colorArr)
     }
 
     const getValueByType = (name) => {
       const value = {
         vertexAttribPointer: {
           size: 3,
-          type: gl.FLOAT,
+          type: this.gl.FLOAT,
           normalized: false,
           stride: 0,
           offset: 0,
         },
-        uniform3f: {
-          x: 0,
-          y: 0,
-          z: 0,
-        },
         bufferData: new Float32Array([]),
       }
       if (name === 'a_Position') {
-        value[bufferData] = meshObject.geometry.vertices
+        value.bufferData = meshObject.geometry.vertices
       } else if (name === 'a_Normal') {
-        value[bufferData] = meshObject.geometry.normals
+        value.bufferData = meshObject.geometry.normals
       } else if (name === 'a_Color') {
-        value[bufferData] = transformColorBuffer(meshObject.material.color)
-      } else if (name === 'u_LightColor') {
-        value[bufferData] = transformColorBuffer(lights[0].color)
+        value.bufferData = transformColorBuffer(
+          meshObject.material.color,
+          meshObject.geometry.vertices.length / 3
+        )
       }
     }
 
@@ -106,6 +124,48 @@ class Renderer {
     }
   }
 
+  // 后期优化多灯光问题
+  uniformSetting(uniforms, meshObject, lights, camera) {
+    const getValueByType = (name) => {
+      const value = {
+        uniform3fv: [],
+        matrix4fv: [],
+      }
+
+      if (name === 'u_LightColor') {
+        value.uniform3f = {
+          x: lights[0].color.x,
+          y: lights[0].color.y,
+          z: lights[0].color.z,
+        }
+      } else if (name === 'u_AmbientLight') {
+        // 环境光的计算待后面优化
+        value.uniform3fv = new Float32Array([0.2, 0.2, 0.2])
+      } else if (name === 'u_LightDirection') {
+        value.uniform3fv = new Float32Array(lights[0].position.toArray())
+      } else if (name === 'u_MvpMatrix') {
+        // 计算视图投影矩阵
+        const mvpMatrix = new Matrix4()
+
+        mvpMatrix.set(...camera.projectionMatrix.element)
+        mvpMatrix.multiply(meshObject.modelMatrix)
+        // 此处需要验证 通过相机位置 来相反的计算物体的位置 是否正确
+        mvpMatrix.multiply(camera.modelMatrix.invert())
+
+        value.matrix4fv = new Float32Array(mvpMatrix.elements)
+      } else if (name === 'u_NormalMatrix') {
+        // 计算法线矩阵，用于物体移动后，法线的变动。先求逆再转置
+        const normalMatrix = new Matrix4()
+        normalMatrix.multiply(meshObject.modelMatrix).invert().transpose()
+
+        value.matrix4fv = new Float32Array(normalMatrix.elements)
+      }
+    }
+
+    for (let name in uniforms) {
+      uniforms[name].value = getValueByType(name)
+    }
+  }
   render(scene, camera) {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT)
 
@@ -136,23 +196,29 @@ class Renderer {
       // 传递shader对象，应用到program中
       const glProgram = this._program.getProgram(shader)
 
-      // 调用gl.getProgramParameter，获取该项目中所有shader变量，生成一个对象attribute(包含buffer数据)
+      // 调用gl.getProgramParameter，获取该项目中所有attribute shader变量，生成一个对象attribute(包含buffer数据)
       const attributes = this.fetchAttributeLocations(this.gl, glProgram)
 
-      // 将顶点灯光等数据以及数据应用方式对应到attribute中
-      setAttributeSetting(attributes, meshObject, this.curRenderLights)
+      // 调用gl.getProgramParameter，获取该项目中所有uniform shader变量，生成一个对象attribute(包含buffer数据)
+      const uniforms = this.uniformSetting(this.gl, glProgram)
+
+      // 配置attributes数据，方便后续应用变量到shader
+      this.attributeSetting(attributes, meshObject, this.curRenderLights)
+
+      // 配置uniforms数据，方便后续应用变量到shader
+      this.uniformSetting(uniforms, meshObject, this.curRenderLights, camera)
 
       // 将数据写入缓冲区，同时应用到shader变量中
-      this._bindState.writeDataToShader(attributes)
+      this._bindState.writeDataToShader(attributes, uniforms)
 
       if (meshObject.geometry.indices.length) {
         // 设置索引
         this._bindState.writeIndicesBufferData(meshObject.geometry.indices)
+        // this.gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
       }
 
       // 渲染
       // this.gl.drawArrays(this.gl.TRIANGLES, 0, points.length / 2);
-      // this.gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
     })
   }
 }
