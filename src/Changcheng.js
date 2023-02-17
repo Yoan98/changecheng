@@ -1,2 +1,6 @@
-export { Renderer } from './renderers/renderer.js';
-export { Creator } from './creator/index.js';
+export { Renderer } from './renderers/Renderer.js'
+export { Creator } from './core/Creator.js'
+export { StandardLight } from './lights/StandardLight.js'
+export { Scene } from './core/Scene.js'
+export { PerspectiveCamera } from './lights/Camera.js'
+export { StandardMaterial } from './materials/StandardMaterial'

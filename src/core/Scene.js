@@ -1,11 +1,11 @@
-import { ObjectBase } from './ObjectBase';
+import { ObjectBase } from './ObjectBase'
 
-class Scene extends ObjectBase{
-  constructor(){
+class Scene extends ObjectBase {
+  constructor() {
     super()
 
-    this.type = 'scene';
+    this.type = 'scene'
   }
 }
 
-export { Scene}
+export { Scene }

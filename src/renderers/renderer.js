@@ -167,6 +167,7 @@ class Renderer {
     }
   }
   render(scene, camera) {
+    this.gl.clearColor(0, 0, 0, 1)
     this.gl.clear(this.gl.COLOR_BUFFER_BIT)
 
     // 处理场景中的所有对象,进行相应的初始化，便于后面操作
@@ -214,12 +215,33 @@ class Renderer {
       if (meshObject.geometry.indices.length) {
         // 设置索引
         this._bindState.writeIndicesBufferData(meshObject.geometry.indices)
-        // this.gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+
+        // 渲染
+        this.gl.drawElements(
+          this.gl.TRIANGLES,
+          meshObject.geometry.indices.length,
+          this.gl.UNSIGNED_BYTE,
+          0
+        )
+        return
       }
 
       // 渲染
-      // this.gl.drawArrays(this.gl.TRIANGLES, 0, points.length / 2);
+      this.gl.drawArrays(
+        this.gl.TRIANGLES,
+        0,
+        meshObject.geometry.vertices.length / 3
+      )
     })
+  }
+
+  renderLoop(callBack) {
+    function animate() {
+      requestAnimationFrame(animate)
+
+      callBack()
+    }
+    animate()
   }
 }
 
