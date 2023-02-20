@@ -41,7 +41,7 @@ class WebglBindState {
     for (let name in uniforms) {
       // attr为着色器变量字符串
 
-      const info = attributes[name]
+      const info = uniforms[name]
 
       const { type, location, value } = info
 

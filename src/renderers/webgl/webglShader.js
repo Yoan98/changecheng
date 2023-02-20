@@ -8,9 +8,22 @@ class WebglShader {
 
   _createShader(shaderData, glShaderType) {
     const shader = this._gl.createShader(glShaderType)
+    if (shader == null) {
+      console.error('unable to create shader')
+      return null
+    }
 
     this._gl.shaderSource(shader, shaderData)
     this._gl.compileShader(shader)
+
+    // Check the result of compilation
+    var compiled = this._gl.getShaderParameter(shader, this._gl.COMPILE_STATUS)
+    if (!compiled) {
+      var error = this._gl.getShaderInfoLog(shader)
+      console.error('Failed to compile shader: ' + error)
+      this._gl.deleteShader(shader)
+      return null
+    }
 
     return shader
   }

@@ -13,5 +13,8 @@
     "eslint": "^8.7.0",
     "parcel-bundler": "^1.12.5",
     "prettier": "^2.5.1"
+  },
+  "dependencies": {
+    "changcheng": "^1.0.0"
   }
 }

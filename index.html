@@ -9,34 +9,5 @@
   <body>
     <canvas id="renderCanvas" touch-action="none"></canvas>
   </body>
-  <script type="importmap">
-    {
-      "imports": {
-        "changcheng": "./changcheng.js"
-      }
-    }
-  </script>
-  <script>
-    import * as CHANGECHENG from 'changecheng'
-
-    const canvas = document.getElementById('renderCanvas')
-
-    const scene = new CHANGECHENG.Scene()
-    const light = new CHANGECHENG.StandardLight()
-    const camera = new CHANGECHENG.PerspectiveCamera()
-
-    const creator = new CHANGECHENG.Creator()
-
-    const material = new CHANGECHENG.StandardMaterial()
-
-    const circleObject = creator.createSphere({}, material)
-
-    scene.add(circleObject)
-
-    const renderer = new CHANGECHENG.Renderer(canvas)
-
-    renderer.renderLoop(() => {
-      renderer.render(scene, camera)
-    })
-  </script>
+  <script src="./index.js"></script>
 </html>

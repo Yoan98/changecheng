@@ -1,6 +1,5 @@
 export const vertex = `
-
-  attribute vec4 a_Position
+  attribute vec4 a_Position;
   attribute vec4 a_Color;
   attribute vec4 a_Normal;
 
@@ -24,10 +23,14 @@ export const vertex = `
     vec3 ambient = u_AmbientLight * a_Color.rgb;
 
     v_Color = vec4(diffuse + ambient, a_Color.a);
-  };
+  }
 
 `
 export const fragment = `
+  #ifdef GL_ES
+  precision mediump float;
+  #endif
+
   varying vec4 v_Color;
 
   void main() {

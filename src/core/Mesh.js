@@ -9,6 +9,11 @@ class Mesh extends ObjectBase {
 
     this.type = 'mesh'
 
+    this.shader = {
+      vertex: '',
+      fragment: '',
+    }
+
     this.setGeometryBuffer(geometryInfo)
   }
 

@@ -1,11 +1,15 @@
-import { WebglProgram } from './webgl/WebglProgram'
+import { WebglProgram } from './webgl/webglProgram'
 import { WebglShader } from './webgl/WebglShader'
 import { WebglBindState } from './webgl/WebglBindState'
 import { Matrix4 } from '../math/Matrix4.js'
-import { SHADER_MAP } from './shader/ShaderMap'
+import { SHADER_MAP } from '../shaders/map'
 class Renderer {
   constructor(canvas) {
     this.gl = this.getContext(canvas)
+
+    if (this.gl === null) {
+      throw new Error('Get gl context error')
+    }
 
     this.curRenderLights = []
     this.curRenderObjects = []
@@ -56,8 +60,6 @@ class Renderer {
       if (info.type === gl.FLOAT_MAT3) locationSize = 3
       if (info.type === gl.FLOAT_MAT4) locationSize = 4
 
-      // console.log( 'THREE.WebGLProgram: ACTIVE VERTEX ATTRIBUTE:', name, i );
-
       attributes[name] = {
         type: info.type,
         location: gl.getAttribLocation(program, name),
@@ -82,6 +84,8 @@ class Renderer {
         location: gl.getUniformLocation(program, info.name),
       }
     }
+
+    return uniforms
   }
 
   // 后期优化多灯光问题
@@ -117,6 +121,7 @@ class Renderer {
           meshObject.geometry.vertices.length / 3
         )
       }
+      return value
     }
 
     for (let name in attributes) {
@@ -132,22 +137,18 @@ class Renderer {
         matrix4fv: [],
       }
 
-      if (name === 'u_LightColor') {
-        value.uniform3f = {
-          x: lights[0].color.x,
-          y: lights[0].color.y,
-          z: lights[0].color.z,
-        }
+      if (name === 'u_LightColor' && lights.length) {
+        value.uniform3fv = new Float32Array(lights[0].color.toArray())
       } else if (name === 'u_AmbientLight') {
         // 环境光的计算待后面优化
         value.uniform3fv = new Float32Array([0.2, 0.2, 0.2])
-      } else if (name === 'u_LightDirection') {
+      } else if (name === 'u_LightDirection' && lights.length) {
         value.uniform3fv = new Float32Array(lights[0].position.toArray())
       } else if (name === 'u_MvpMatrix') {
         // 计算视图投影矩阵
         const mvpMatrix = new Matrix4()
 
-        mvpMatrix.set(...camera.projectionMatrix.element)
+        mvpMatrix.set(...camera.projectionMatrix.elements)
         mvpMatrix.multiply(meshObject.modelMatrix)
         // 此处需要验证 通过相机位置 来相反的计算物体的位置 是否正确
         mvpMatrix.multiply(camera.modelMatrix.invert())
@@ -160,6 +161,8 @@ class Renderer {
 
         value.matrix4fv = new Float32Array(normalMatrix.elements)
       }
+
+      return value
     }
 
     for (let name in uniforms) {
@@ -190,18 +193,28 @@ class Renderer {
 
       const shader = new WebglShader(
         this.gl,
-        meshObject.vertex,
-        meshObject.fragment
+        meshObject.shader.vertex,
+        meshObject.shader.fragment
       )
+
+      if (shader.vertexShader === null || shader.fragmentShader === null) {
+        console.error('Compile shader error')
+        return
+      }
 
       // 传递shader对象，应用到program中
       const glProgram = this._program.getProgram(shader)
+
+      if (glProgram === null) {
+        console.error('Create program error')
+        return
+      }
 
       // 调用gl.getProgramParameter，获取该项目中所有attribute shader变量，生成一个对象attribute(包含buffer数据)
       const attributes = this.fetchAttributeLocations(this.gl, glProgram)
 
       // 调用gl.getProgramParameter，获取该项目中所有uniform shader变量，生成一个对象attribute(包含buffer数据)
-      const uniforms = this.uniformSetting(this.gl, glProgram)
+      const uniforms = this.fetchUniformLocations(this.gl, glProgram)
 
       // 配置attributes数据，方便后续应用变量到shader
       this.attributeSetting(attributes, meshObject, this.curRenderLights)
