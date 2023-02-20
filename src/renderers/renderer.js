@@ -1,7 +1,7 @@
 import { WebglProgram } from './webgl/webglProgram'
 import { WebglShader } from './webgl/WebglShader'
 import { WebglBindState } from './webgl/WebglBindState'
-import { Matrix4 } from '../math/Matrix4.js'
+import { Matrix4  } from '../math/Matrix4.js'
 import { SHADER_MAP } from '../shaders/map'
 class Renderer {
   constructor(canvas) {
@@ -22,6 +22,8 @@ class Renderer {
     this._program = new WebglProgram(gl)
 
     this._bindState = new WebglBindState(gl)
+
+    this.gl.enable(gl.DEPTH_TEST);
   }
 
   getContext(canvas, contextAttributes = {}) {
@@ -149,9 +151,10 @@ class Renderer {
         const mvpMatrix = new Matrix4()
 
         mvpMatrix.set(...camera.projectionMatrix.elements)
-        mvpMatrix.multiply(meshObject.modelMatrix)
-        // 此处需要验证 通过相机位置 来相反的计算物体的位置 是否正确
+        // 通过相机位置 来相反的计算物体的位置
         mvpMatrix.multiply(camera.modelMatrix.invert())
+
+        mvpMatrix.multiply(meshObject.modelMatrix)
 
         value.matrix4fv = new Float32Array(mvpMatrix.elements)
       } else if (name === 'u_NormalMatrix') {
@@ -183,7 +186,11 @@ class Renderer {
       } else if (child.type === 'camera') {
         this.curCamera = child
       }
+
+      child.updateMatrix()
     })
+
+    camera.updateMatrix()
 
     // 注：一个对象对应一个program 一个shader 一个buffer 一次渲染
 
@@ -215,6 +222,9 @@ class Renderer {
 
       // 调用gl.getProgramParameter，获取该项目中所有uniform shader变量，生成一个对象attribute(包含buffer数据)
       const uniforms = this.fetchUniformLocations(this.gl, glProgram)
+
+      console.log(attributes)
+      console.log(uniforms)
 
       // 配置attributes数据，方便后续应用变量到shader
       this.attributeSetting(attributes, meshObject, this.curRenderLights)

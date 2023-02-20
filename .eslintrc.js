@@ -26,13 +26,6 @@ module.exports = {
       },
     ],
     'block-spacing': [2, 'always'],
-    indent: [
-      2,
-      2,
-      {
-        SwitchCase: 1,
-      },
-    ],
     'handle-callback-err': 0,
     'no-useless-escape': 0,
     quotes: [
@@ -43,7 +36,6 @@ module.exports = {
         allowTemplateLiterals: true,
       },
     ],
-    semi: [2, 'never'],
     'semi-spacing': [
       2,
       {
@@ -51,7 +43,6 @@ module.exports = {
         after: true,
       },
     ],
-    'space-before-blocks': [2, 'always'],
     'space-before-function-paren': 0,
     'space-in-parens': [2, 'never'],
     'space-infix-ops': 2,

@@ -1,6 +1,7 @@
 import { ObjectBase } from '../core/ObjectBase'
 import { Matrix4 } from '../math/Matrix4.js'
 import * as MathUtils from '../math/MathUtils.js'
+import { Vector3 } from '../math/Vector3.js'
 class PerspectiveCamera extends ObjectBase {
   constructor(fov = 50, aspect = 1, near = 0.1, far = 2000) {
     super()
