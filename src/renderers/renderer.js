@@ -1,7 +1,7 @@
 import { WebglProgram } from './webgl/webglProgram'
 import { WebglShader } from './webgl/WebglShader'
 import { WebglBindState } from './webgl/WebglBindState'
-import { Matrix4  } from '../math/Matrix4.js'
+import { Matrix4 } from '../math/Matrix4.js'
 import { SHADER_MAP } from '../shaders/map'
 class Renderer {
   constructor(canvas) {
@@ -23,7 +23,7 @@ class Renderer {
 
     this._bindState = new WebglBindState(gl)
 
-    this.gl.enable(gl.DEPTH_TEST);
+    this.gl.enable(gl.DEPTH_TEST)
   }
 
   getContext(canvas, contextAttributes = {}) {
@@ -147,13 +147,12 @@ class Renderer {
       } else if (name === 'u_LightDirection' && lights.length) {
         value.uniform3fv = new Float32Array(lights[0].position.toArray())
       } else if (name === 'u_MvpMatrix') {
-        // 计算视图投影矩阵
+        // 计算投影矩阵
         const mvpMatrix = new Matrix4()
+        const lookAtMatrix = new Matrix4().setLookAt(camera.position, camera.target, camera.up)
 
         mvpMatrix.set(...camera.projectionMatrix.elements)
-        // 通过相机位置 来相反的计算物体的位置
-        mvpMatrix.multiply(camera.modelMatrix.invert())
-
+        mvpMatrix.multiply(lookAtMatrix)
         mvpMatrix.multiply(meshObject.modelMatrix)
 
         value.matrix4fv = new Float32Array(mvpMatrix.elements)

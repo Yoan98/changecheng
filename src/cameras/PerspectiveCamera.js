@@ -16,6 +16,10 @@ class PerspectiveCamera extends ObjectBase {
 
     this.aspect = aspect
 
+    // 计算视图矩阵的观察目标点位与向上朝向
+    this.target = new Vector3(0, 0, 0)
+    this.up = new Vector3(0, 1, 0)
+
     this.projectionMatrix = new Matrix4()
 
     this.updateProjectionMatrix()

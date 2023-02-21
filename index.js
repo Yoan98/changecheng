@@ -5,8 +5,8 @@ const canvas = document.getElementById('renderCanvas')
 const scene = new CHANGECHENG.Scene()
 const light = new CHANGECHENG.StandardLight()
 
-const camera = new CHANGECHENG.PerspectiveCamera(20, canvas.width / canvas.height, 0.5, 2000)
-camera.position.set(0,0,10)
+const camera = new CHANGECHENG.PerspectiveCamera(30, 1, 1, 1000)
+camera.position.set(0,2,10)
 // camera.rotateY(Math.PI / 9)
 
 const creator = new CHANGECHENG.Creator()
@@ -14,9 +14,10 @@ const creator = new CHANGECHENG.Creator()
 const material = new CHANGECHENG.StandardMaterial()
 
 const circleObject = creator.createTest(material)
+// const circleObject = creator.createSphere({},material)
 
-circleObject.position.set(5,0,-10)
-// circleObject.rotateY(Math.PI / 2)
+// circleObject.position.set(5,0,-10)
+// circleObject.rotateY(Math.PI / 6)
 
 scene.add(circleObject)
 scene.add(light)
