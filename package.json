@@ -15,6 +15,7 @@
     "prettier": "^2.5.1"
   },
   "dependencies": {
-    "changcheng": "^1.0.0"
+    "changcheng": "^1.0.0",
+    "gsap": "^3.11.4"
   }
 }

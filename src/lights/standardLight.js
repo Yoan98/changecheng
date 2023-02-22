@@ -6,7 +6,7 @@ class StandardLight extends ObjectBase {
 
     this.type = 'light'
 
-    this.color = new Color(0xffffff)
+    this.color = new Color(1,1,1)
   }
 }
 

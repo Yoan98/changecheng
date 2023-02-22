@@ -140,12 +140,16 @@ class Renderer {
       }
 
       if (name === 'u_LightColor' && lights.length) {
+        // 灯光颜色
         value.uniform3fv = new Float32Array(lights[0].color.toArray())
       } else if (name === 'u_AmbientLight') {
         // 环境光的计算待后面优化
         value.uniform3fv = new Float32Array([0.2, 0.2, 0.2])
       } else if (name === 'u_LightDirection' && lights.length) {
-        value.uniform3fv = new Float32Array(lights[0].position.toArray())
+
+        const u_LightDirection = lights[0].position.normalize().toArray()
+        value.uniform3fv = new Float32Array(u_LightDirection)
+
       } else if (name === 'u_MvpMatrix') {
         // 计算投影矩阵
         const mvpMatrix = new Matrix4()
@@ -203,6 +207,8 @@ class Renderer {
         meshObject.shader.fragment
       )
 
+      // console.log(meshObject)
+
       if (shader.vertexShader === null || shader.fragmentShader === null) {
         console.error('Compile shader error')
         return
@@ -222,8 +228,8 @@ class Renderer {
       // 调用gl.getProgramParameter，获取该项目中所有uniform shader变量，生成一个对象attribute(包含buffer数据)
       const uniforms = this.fetchUniformLocations(this.gl, glProgram)
 
-      console.log(attributes)
-      console.log(uniforms)
+      // console.log(attributes)
+      // console.log(uniforms)
 
       // 配置attributes数据，方便后续应用变量到shader
       this.attributeSetting(attributes, meshObject, this.curRenderLights)
