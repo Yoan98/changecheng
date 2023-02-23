@@ -27,13 +27,17 @@ class ObjectBase {
     this.modelMatrix.compose(this.position, this.quaternion, this.scale)
   }
 
-  rotateOnAxis(axis, angle) {
+  rotateOnAxis(axis, angle, isReset = true) {
     // rotate object on axis in object space
     // axis is assumed to be normalized
 
     _q1.setFromAxisAngle(axis, angle)
 
-    this.quaternion.multiply(_q1)
+    if (isReset) {
+      this.quaternion = _q1
+    } else {
+      this.quaternion.multiply(_q1)
+    }
 
     return this
   }

@@ -32,10 +32,10 @@ const renderer = new CHANGECHENG.Renderer(canvas)
 
 const rotateObj = { props: 0 }
 gsap.to(rotateObj, {
-  duration: 100,
+  duration: 10,
   props: Math.PI * 2,
   ease: 'none',
-  repeat: -1,
+  repeat: 0,
   repeatDelay: 0,
   yoyo: false,
   onUpdate: function (a, b, c) {
