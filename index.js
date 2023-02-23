@@ -46,8 +46,8 @@ gsap.to(rotateObj, {
   },
 })
 
-// renderer.renderLoop(() => {
-//   circleObject.rotateY(rotateObj.props)
+renderer.renderLoop(() => {
+  circleObject.rotateY(rotateObj.props)
 
-// })
-renderer.render(scene, camera)
+  renderer.render(scene, camera)
+})

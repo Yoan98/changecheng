@@ -19,7 +19,7 @@ export const vertex = `
 
     vec3 normal = normalize(vec3(u_NormalMatrix * a_Normal));
     vec3 lightDirectionNor = normalize(u_LightDirection);
-    float nDotL = max(dot(u_LightDirection, normal), 0.0);
+    float nDotL = max(dot(lightDirectionNor, normal), 0.0);
 
     float lightR = distance(vec3(u_ModelMatrix * a_Position), u_LightDirection);
 
