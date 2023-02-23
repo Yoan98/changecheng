@@ -46,9 +46,11 @@ class WebglBindState {
       const { type, location, value } = info
 
       if (type === this._gl.FLOAT_MAT4) {
-        this._gl.uniformMatrix4fv(location, false, value.matrix4fv)
+        this._gl.uniformMatrix4fv(location, false, value.uniformMatrix4fv)
       } else if (type === this._gl.FLOAT_VEC3 || type === this._gl.INT_VEC3) {
         this._gl.uniform3fv(location, value.uniform3fv)
+      } else if (type === this._gl.FLOAT || type === this._gl.INT) {
+        this._gl.uniform1f(location, value.uniform1f)
       }
     }
   }

@@ -136,7 +136,8 @@ class Renderer {
     const getValueByType = (name) => {
       const value = {
         uniform3fv: [],
-        matrix4fv: [],
+        uniformMatrix4fv: [],
+        uniform1f: null,
       }
 
       if (name === 'u_LightColor' && lights.length) {
@@ -146,26 +147,36 @@ class Renderer {
         // 环境光的计算待后面优化
         value.uniform3fv = new Float32Array([0.2, 0.2, 0.2])
       } else if (name === 'u_LightDirection' && lights.length) {
-
-        const u_LightDirection = lights[0].position.normalize().toArray()
+        const u_LightDirection = lights[0].position.toArray()
         value.uniform3fv = new Float32Array(u_LightDirection)
+      } else if (name === 'u_LightIntensity' && lights.length) {
+        const u_LightIntensity = lights[0].intensity
 
+        value.uniform1f = u_LightIntensity
+      } else if (name === 'u_ModelMatrix') {
+        value.uniformMatrix4fv = new Float32Array(
+          meshObject.modelMatrix.elements
+        )
       } else if (name === 'u_MvpMatrix') {
         // 计算投影矩阵
         const mvpMatrix = new Matrix4()
-        const lookAtMatrix = new Matrix4().setLookAt(camera.position, camera.target, camera.up)
+        const lookAtMatrix = new Matrix4().setLookAt(
+          camera.position,
+          camera.target,
+          camera.up
+        )
 
         mvpMatrix.set(...camera.projectionMatrix.elements)
         mvpMatrix.multiply(lookAtMatrix)
         mvpMatrix.multiply(meshObject.modelMatrix)
 
-        value.matrix4fv = new Float32Array(mvpMatrix.elements)
+        value.uniformMatrix4fv = new Float32Array(mvpMatrix.elements)
       } else if (name === 'u_NormalMatrix') {
         // 计算法线矩阵，用于物体移动后，法线的变动。先求逆再转置
         const normalMatrix = new Matrix4()
         normalMatrix.multiply(meshObject.modelMatrix).invert().transpose()
 
-        value.matrix4fv = new Float32Array(normalMatrix.elements)
+        value.uniformMatrix4fv = new Float32Array(normalMatrix.elements)
       }
 
       return value
