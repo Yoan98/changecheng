@@ -4,10 +4,13 @@ export const vertex = `
   attribute vec4 a_Normal;
 
   uniform mat4 u_MvpMatrix;
+  uniform mat4 u_ModelMatrix;
   uniform mat4 u_NormalMatrix;
+
   uniform vec3 u_LightColor;
-  uniform vec3 u_LightDirection;
+  uniform vec3 u_LightPosition;
   uniform vec3 u_AmbientLight;
+  uniform float u_LightIntensity;
 
   varying vec4 v_Color;
 
@@ -15,10 +18,14 @@ export const vertex = `
     gl_Position = u_MvpMatrix * a_Position;
 
     vec3 normal = normalize(vec3(u_NormalMatrix * a_Normal));
+    vec3 lightNor = normalize(u_LightPosition);
+    float nDotL = max(dot(lightNor, normal), 0.0);
 
-    float nDotL = max(dot(u_LightDirection, normal), 0.0);
+    float lightR = distance(normalize(vec3(u_ModelMatrix * a_Position)), lightNor);
 
-    vec3 diffuse = u_LightColor * a_Color.rgb * nDotL;
+    float lightIntensByPos = u_LightIntensity / (lightR * lightR);
+
+    vec3 diffuse = a_Color.rgb * u_LightColor * lightIntensByPos  * nDotL;
 
     vec3 ambient = u_AmbientLight * a_Color.rgb;
 

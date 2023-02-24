@@ -4,7 +4,7 @@ class StandardMaterial {
   constructor() {
     this.shaderId = 'stander'
 
-    this.color = new Color(1,1,1)
+    this.color = new Color(1, 0, 0)
   }
 }
 

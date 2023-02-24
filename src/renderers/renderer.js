@@ -5,7 +5,9 @@ import { Matrix4 } from '../math/Matrix4.js'
 import { SHADER_MAP } from '../shaders/map'
 class Renderer {
   constructor(canvas) {
-    this.gl = this.getContext(canvas)
+    this.gl = this.getContext(canvas, {
+      // antialias: true,
+    })
 
     if (this.gl === null) {
       throw new Error('Get gl context error')
@@ -145,10 +147,10 @@ class Renderer {
         value.uniform3fv = new Float32Array(lights[0].color.toArray())
       } else if (name === 'u_AmbientLight') {
         // 环境光的计算待后面优化
-        value.uniform3fv = new Float32Array([0.2, 0.2, 0.2])
-      } else if (name === 'u_LightDirection' && lights.length) {
-        const u_LightDirection = lights[0].position.toArray()
-        value.uniform3fv = new Float32Array(u_LightDirection)
+        value.uniform3fv = new Float32Array([0, 0, 0])
+      } else if (name === 'u_LightPosition' && lights.length) {
+        const u_LightPosition = lights[0].position.toArray()
+        value.uniform3fv = new Float32Array(u_LightPosition)
       } else if (name === 'u_LightIntensity' && lights.length) {
         const u_LightIntensity = lights[0].intensity
 

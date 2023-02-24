@@ -6,13 +6,13 @@ const canvas = document.getElementById('renderCanvas')
 const scene = new CHANGECHENG.Scene()
 
 const light = new CHANGECHENG.StandardLight()
-light.position.set(10, 10, 0)
+light.position.set(10, 5, 0)
 
 const camera = new CHANGECHENG.PerspectiveCamera(
-  30,
+  40,
   canvas.width / canvas.height,
   1,
-  100
+  200
 )
 camera.position.set(0, 2, 10)
 
@@ -32,10 +32,10 @@ const renderer = new CHANGECHENG.Renderer(canvas)
 
 const rotateObj = { props: 0 }
 gsap.to(rotateObj, {
-  duration: 10,
+  duration: 5,
   props: Math.PI * 2,
   ease: 'none',
-  repeat: 0,
+  repeat: -1,
   repeatDelay: 0,
   yoyo: false,
   onUpdate: function (a, b, c) {
@@ -51,3 +51,7 @@ renderer.renderLoop(() => {
 
   renderer.render(scene, camera)
 })
+
+// circleObject.rotateY(Math.PI * 1.7)
+
+// renderer.render(scene, camera)
