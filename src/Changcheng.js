@@ -1,6 +1,6 @@
 export { Renderer } from './renderers/Renderer.js'
 export { Creator } from './core/Creator.js'
-export { StandardLight } from './lights/StandardLight.js'
+export { DirectionLight } from './lights/DirectionLight.js'
 export { Scene } from './core/Scene.js'
 export { PerspectiveCamera } from './cameras/PerspectiveCamera'
-export { StandardMaterial } from './materials/StandardMaterial'
+export { PhoneMaterial } from './materials/PhoneMaterial'

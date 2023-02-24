@@ -5,11 +5,11 @@ const canvas = document.getElementById('renderCanvas')
 
 const scene = new CHANGECHENG.Scene()
 
-const light = new CHANGECHENG.StandardLight()
-light.position.set(10, 5, 0)
+const light = new CHANGECHENG.DirectionLight()
+light.position.set(10, 10, 10)
 
 const camera = new CHANGECHENG.PerspectiveCamera(
-  40,
+  30,
   canvas.width / canvas.height,
   1,
   200
@@ -18,7 +18,7 @@ camera.position.set(0, 2, 10)
 
 const creator = new CHANGECHENG.Creator()
 
-const material = new CHANGECHENG.StandardMaterial()
+const material = new CHANGECHENG.PhoneMaterial()
 
 const circleObject = creator.createTest(material)
 // const circleObject = creator.createSphere({},material)

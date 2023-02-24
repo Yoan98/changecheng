@@ -179,8 +179,15 @@ class Renderer {
         normalMatrix.multiply(meshObject.modelMatrix).invert().transpose()
 
         value.uniformMatrix4fv = new Float32Array(normalMatrix.elements)
+      } else if (name == 'u_EyePosition') {
+        value.uniform3fv = new Float32Array(camera.position.toArray())
+      } else if (name == 'u_SpecularColor') {
+        value.uniform3fv = new Float32Array(
+          meshObject.material.specular.toArray()
+        )
+      } else if (name == 'u_SpecularPlot') {
+        value.uniform1f = parseFloat(meshObject.material.specularPlot)
       }
-
       return value
     }
 

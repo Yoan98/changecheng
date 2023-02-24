@@ -1,3 +1,5 @@
+// 使用Blinn-Phone模型
+
 export const vertex = `
   attribute vec4 a_Position;
   attribute vec4 a_Color;
@@ -26,9 +28,15 @@ export const fragment = `
   uniform mat4 u_ModelMatrix;
   uniform mat4 u_NormalMatrix;
 
+  uniform vec3 u_EyePosition;
+
   uniform vec3 u_LightColor;
   uniform vec3 u_LightPosition;
   uniform vec3 u_AmbientLight;
+
+  uniform vec3 u_SpecularColor;
+  uniform float u_SpecularPlot;
+
   uniform float u_LightIntensity;
 
   varying vec4 v_Color;
@@ -37,20 +45,26 @@ export const fragment = `
 
   void main() {
 
-    vec3 normal = normalize(vec3(u_NormalMatrix * v_Normal));
-    vec3 lightNor = normalize(u_LightPosition);
+    vec3 halfVec = u_EyePosition + u_LightPosition;
 
-    float nDotL = max(dot(lightNor, normal), 0.0);
+    vec3 normalNor = normalize(vec3(u_NormalMatrix * v_Normal));
+    vec3 lightNor = normalize(u_LightPosition);
+    vec3 halfVecNor = normalize(halfVec);
+
+    float nDotL = max(dot(lightNor, normalNor), 0.0);
+    float nDotH = max(dot(halfVecNor, normalNor), 0.0);
 
     float lightR = distance(normalize(vec3(u_ModelMatrix * v_Position)), lightNor);
 
     float lightIntensByPos = u_LightIntensity / (lightR * lightR);
 
-    vec3 diffuse = v_Color.rgb * u_LightColor * lightIntensByPos  * nDotL;
+    vec3 diffuse = v_Color.rgb * u_LightColor * lightIntensByPos * nDotL;
+
+    vec3 specular = u_SpecularColor * lightIntensByPos * pow(nDotH,u_SpecularPlot);
 
     vec3 ambient = u_AmbientLight * v_Color.rgb;
 
-    gl_FragColor = vec4(diffuse + ambient, v_Color.a);
+    gl_FragColor = vec4(diffuse + specular + ambient, v_Color.a);
   }
 
   `

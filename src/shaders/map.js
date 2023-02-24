@@ -1,4 +1,4 @@
-import * as stander from './lib/Standard.glsl'
+import * as stander from './lib/Phone.glsl'
 
 const SHADER_MAP = {
   stander,

@@ -1,6 +1,6 @@
 import { ObjectBase } from '../core/ObjectBase'
 import { Color } from '../math/Color.js'
-class StandardLight extends ObjectBase {
+class DirectionLight extends ObjectBase {
   constructor() {
     super()
 
@@ -12,4 +12,4 @@ class StandardLight extends ObjectBase {
   }
 }
 
-export { StandardLight }
+export { DirectionLight }
