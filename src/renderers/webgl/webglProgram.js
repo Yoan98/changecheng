@@ -11,7 +11,6 @@ class WebglProgram {
 
   getProgram(meshObject, glShader) {
     let glProgram = this.programWeakMap.get(meshObject)
-    debugger
     if (glProgram) {
       // 有缓存program
 

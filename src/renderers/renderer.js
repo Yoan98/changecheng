@@ -1,108 +1,108 @@
-import { WebglProgram } from './webgl/webglProgram'
-import { WebglShader } from './webgl/WebglShader'
-import { WebglBindState } from './webgl/WebglBindState'
-import { Matrix4 } from '../math/Matrix4.js'
-import { SHADER_MAP } from '../shaders/map'
+import { WebglProgram } from "./webgl/webglProgram";
+import { WebglShader } from "./webgl/WebglShader";
+import { WebglBindState } from "./webgl/WebglBindState";
+import { Matrix4 } from "../math/Matrix4.js";
+import { SHADER_MAP } from "../shaders/map";
 class Renderer {
   constructor(canvas) {
     this.gl = this.getContext(canvas, {
       // antialias: true,
-    })
+    });
 
     if (this.gl === null) {
-      throw new Error('Get gl context error')
+      throw new Error("Get gl context error");
     }
 
-    this.curRenderLights = []
-    this.curRenderObjects = []
-    this.curCamera = {}
+    this.curRenderLights = [];
+    this.curRenderObjects = [];
+    this.curCamera = {};
 
-    this.initGlContext(this.gl)
+    this.initGlContext(this.gl);
   }
 
   initGlContext(gl) {
-    this._programMana = new WebglProgram(gl)
+    this._programMana = new WebglProgram(gl);
 
-    this._bindState = new WebglBindState(gl)
+    this._bindState = new WebglBindState(gl);
 
-    this._shaderMana = new WebglShader(gl)
+    this._shaderMana = new WebglShader(gl);
 
-    this.gl.enable(gl.DEPTH_TEST)
+    this.gl.enable(gl.DEPTH_TEST);
   }
 
   getContext(canvas, contextAttributes = {}) {
-    const contextNames = ['webgl2', 'webgl', 'experimental-webgl']
+    const contextNames = ["webgl2", "webgl", "experimental-webgl"];
 
     for (let i = 0; i < contextNames.length; i++) {
-      const contextName = contextNames[i]
-      const context = canvas.getContext(contextName, contextAttributes)
-      if (context !== null) return context
+      const contextName = contextNames[i];
+      const context = canvas.getContext(contextName, contextAttributes);
+      if (context !== null) return context;
     }
 
-    return null
+    return null;
   }
 
   generateShader(meshObject) {
-    const { material } = meshObject
+    const { material } = meshObject;
 
-    const { vertex, fragment } = SHADER_MAP[material.shaderId]
+    const { vertex, fragment } = SHADER_MAP[material.shaderId];
 
-    meshObject.shader.vertex = vertex
-    meshObject.shader.fragment = fragment
+    meshObject.shader.vertex = vertex;
+    meshObject.shader.fragment = fragment;
   }
   fetchAttributeLocations(gl, program) {
-    const attributes = {}
+    const attributes = {};
 
-    const n = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES)
+    const n = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
 
     for (let i = 0; i < n; i++) {
-      const info = gl.getActiveAttrib(program, i)
-      const name = info.name
+      const info = gl.getActiveAttrib(program, i);
+      const name = info.name;
 
-      let locationSize = 1
-      if (info.type === gl.FLOAT_MAT2) locationSize = 2
-      if (info.type === gl.FLOAT_MAT3) locationSize = 3
-      if (info.type === gl.FLOAT_MAT4) locationSize = 4
+      let locationSize = 1;
+      if (info.type === gl.FLOAT_MAT2) locationSize = 2;
+      if (info.type === gl.FLOAT_MAT3) locationSize = 3;
+      if (info.type === gl.FLOAT_MAT4) locationSize = 4;
 
       attributes[name] = {
         type: info.type,
         location: gl.getAttribLocation(program, name),
         locationSize: locationSize,
-      }
+      };
     }
 
-    return attributes
+    return attributes;
   }
 
   fetchUniformLocations(gl, program) {
-    const n = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)
+    const n = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
-    const uniforms = {}
+    const uniforms = {};
 
     for (let i = 0; i < n; ++i) {
-      const info = gl.getActiveUniform(program, i)
-      const name = info.name
+      const info = gl.getActiveUniform(program, i);
+      const name = info.name;
 
       uniforms[name] = {
         type: info.type,
         location: gl.getUniformLocation(program, info.name),
-      }
+      };
     }
 
-    return uniforms
+    return uniforms;
   }
 
   // 后期优化多灯光问题
   attributeSetting(attributes, meshObject, lights) {
     const transformColorBuffer = (color, length) => {
-      let colorArr = []
+      let colorArr = [];
       for (let i = 0; i < length; i++) {
-        const rgbArr = color.toArray([])
+        const rgbArr = color.toArray([]);
 
-        colorArr = colorArr.concat(rgbArr)
+        colorArr = colorArr.concat(rgbArr);
       }
-      return new Float32Array(colorArr)
-    }
+      return new Float32Array(colorArr);
+    };
 
     const getValueByType = (name) => {
       const value = {
@@ -114,22 +114,22 @@ class Renderer {
           offset: 0,
         },
         bufferData: new Float32Array([]),
-      }
-      if (name === 'a_Position') {
-        value.bufferData = meshObject.geometry.vertices
-      } else if (name === 'a_Normal') {
-        value.bufferData = meshObject.geometry.normals
-      } else if (name === 'a_Color') {
+      };
+      if (name === "a_Position") {
+        value.bufferData = meshObject.geometry.vertices;
+      } else if (name === "a_Normal") {
+        value.bufferData = meshObject.geometry.normals;
+      } else if (name === "a_Color") {
         value.bufferData = transformColorBuffer(
           meshObject.material.color,
           meshObject.geometry.vertices.length / 3
-        )
+        );
       }
-      return value
-    }
+      return value;
+    };
 
     for (let name in attributes) {
-      attributes[name].value = getValueByType(name)
+      attributes[name].value = getValueByType(name);
     }
   }
 
@@ -140,83 +140,85 @@ class Renderer {
         uniform3fv: [],
         uniformMatrix4fv: [],
         uniform1f: null,
-      }
+      };
 
-      if (name === 'u_LightColor' && lights.length) {
+      if (name === "u_LightColor" && lights.length) {
         // 灯光颜色
-        value.uniform3fv = new Float32Array(lights[0].color.toArray())
-      } else if (name === 'u_AmbientLight') {
+        value.uniform3fv = new Float32Array(lights[0].color.toArray());
+      } else if (name === "u_AmbientLight") {
         // 环境光的计算待后面优化
-        value.uniform3fv = new Float32Array([0, 0, 0])
-      } else if (name === 'u_LightPosition' && lights.length) {
-        const u_LightPosition = lights[0].position.toArray()
-        value.uniform3fv = new Float32Array(u_LightPosition)
-      } else if (name === 'u_LightIntensity' && lights.length) {
-        const u_LightIntensity = lights[0].intensity
+        value.uniform3fv = new Float32Array(
+          meshObject.material.envColor.toArray()
+        );
+      } else if (name === "u_LightPosition" && lights.length) {
+        const u_LightPosition = lights[0].position.toArray();
+        value.uniform3fv = new Float32Array(u_LightPosition);
+      } else if (name === "u_LightIntensity" && lights.length) {
+        const u_LightIntensity = lights[0].intensity;
 
-        value.uniform1f = u_LightIntensity
-      } else if (name === 'u_ModelMatrix') {
+        value.uniform1f = u_LightIntensity;
+      } else if (name === "u_ModelMatrix") {
         value.uniformMatrix4fv = new Float32Array(
           meshObject.modelMatrix.elements
-        )
-      } else if (name === 'u_MvpMatrix') {
+        );
+      } else if (name === "u_MvpMatrix") {
         // 计算投影矩阵
-        const mvpMatrix = new Matrix4()
+        const mvpMatrix = new Matrix4();
         const lookAtMatrix = new Matrix4().setLookAt(
           camera.position,
           camera.target,
           camera.up
-        )
+        );
 
-        mvpMatrix.set(...camera.projectionMatrix.elements)
-        mvpMatrix.multiply(lookAtMatrix)
-        mvpMatrix.multiply(meshObject.modelMatrix)
+        mvpMatrix.set(...camera.projectionMatrix.elements);
+        mvpMatrix.multiply(lookAtMatrix);
+        mvpMatrix.multiply(meshObject.modelMatrix);
 
-        value.uniformMatrix4fv = new Float32Array(mvpMatrix.elements)
-      } else if (name === 'u_NormalMatrix') {
+        value.uniformMatrix4fv = new Float32Array(mvpMatrix.elements);
+      } else if (name === "u_NormalMatrix") {
         // 计算法线矩阵，用于物体移动后，法线的变动。先求逆再转置
-        const normalMatrix = new Matrix4()
-        normalMatrix.multiply(meshObject.modelMatrix).invert().transpose()
+        const normalMatrix = new Matrix4();
+        normalMatrix.multiply(meshObject.modelMatrix).invert().transpose();
 
-        value.uniformMatrix4fv = new Float32Array(normalMatrix.elements)
-      } else if (name == 'u_EyePosition') {
-        value.uniform3fv = new Float32Array(camera.position.toArray())
-      } else if (name == 'u_SpecularColor') {
+        value.uniformMatrix4fv = new Float32Array(normalMatrix.elements);
+      } else if (name == "u_EyePosition") {
+        value.uniform3fv = new Float32Array(camera.position.toArray());
+      } else if (name == "u_SpecularColor") {
         value.uniform3fv = new Float32Array(
           meshObject.material.specular.toArray()
-        )
-      } else if (name == 'u_SpecularPlot') {
-        value.uniform1f = parseFloat(meshObject.material.specularPlot)
+        );
+      } else if (name == "u_SpecularPlot") {
+        value.uniform1f = parseFloat(meshObject.material.specularPlot);
       }
-      return value
-    }
+      return value;
+    };
 
     for (let name in uniforms) {
-      uniforms[name].value = getValueByType(name)
+      uniforms[name].value = getValueByType(name);
     }
   }
   render(scene, camera) {
-    this.gl.clearColor(0, 0, 0, 1)
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT)
+    this.gl.clearColor(0, 0, 0, 1);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-    this.curRenderObjects = []
-    this.curRenderLights = []
+    this.curRenderObjects = [];
+    this.curRenderLights = [];
 
     // 处理场景中的所有对象,进行相应的初始化，便于后面操作
     // 后期优化过滤一些不需要显示的对象
     scene.children.forEach((child) => {
-      if (child.type === 'mesh') {
-        this.curRenderObjects.push(child)
-      } else if (child.type === 'light') {
-        this.curRenderLights.push(child)
-      } else if (child.type === 'camera') {
-        this.curCamera = child
+      if (child.type === "mesh") {
+        this.curRenderObjects.push(child);
+      } else if (child.type === "light") {
+        this.curRenderLights.push(child);
+      } else if (child.type === "camera") {
+        this.curCamera = child;
       }
 
-      child.updateMatrix()
-    })
+      child.updateMatrix();
+    });
 
-    camera.updateMatrix()
+    camera.updateMatrix();
 
     // 注：一个对象对应一个program 一个shader 一个buffer 一次渲染
 
@@ -224,46 +226,46 @@ class Renderer {
       // 缓存shader与program，优化
 
       // 生成顶点与片元着色器字符串
-      this.generateShader(meshObject)
+      this.generateShader(meshObject);
 
-      const glShader = this._shaderMana.getShader(meshObject)
+      const glShader = this._shaderMana.getShader(meshObject);
 
       // console.log(meshObject)
 
       if (glShader.vertexShader === null || glShader.fragmentShader === null) {
-        console.error('Compile shader error')
-        return
+        console.error("Compile shader error");
+        return;
       }
 
       // 传递shader对象，应用到program中
-      const glProgram = this._programMana.getProgram(meshObject, glShader)
+      const glProgram = this._programMana.getProgram(meshObject, glShader);
 
       if (glProgram === null) {
-        console.error('Create program error')
-        return
+        console.error("Create program error");
+        return;
       }
 
       // 调用gl.getProgramParameter，获取该项目中所有attribute shader变量，生成一个对象attribute(包含buffer数据)
-      const attributes = this.fetchAttributeLocations(this.gl, glProgram)
+      const attributes = this.fetchAttributeLocations(this.gl, glProgram);
 
       // 调用gl.getProgramParameter，获取该项目中所有uniform shader变量，生成一个对象attribute
-      const uniforms = this.fetchUniformLocations(this.gl, glProgram)
+      const uniforms = this.fetchUniformLocations(this.gl, glProgram);
 
       // console.log(attributes)
       // console.log(uniforms)
 
       // 配置attributes数据，方便后续应用变量到shader
-      this.attributeSetting(attributes, meshObject, this.curRenderLights)
+      this.attributeSetting(attributes, meshObject, this.curRenderLights);
 
       // 配置uniforms数据，方便后续应用变量到shader
-      this.uniformSetting(uniforms, meshObject, this.curRenderLights, camera)
+      this.uniformSetting(uniforms, meshObject, this.curRenderLights, camera);
 
       // 将数据写入缓冲区，同时应用到shader变量中
-      this._bindState.writeDataToShader(attributes, uniforms)
+      this._bindState.writeDataToShader(attributes, uniforms);
 
       if (meshObject.geometry.indices.length) {
         // 设置索引
-        this._bindState.writeIndicesBufferData(meshObject.geometry.indices)
+        this._bindState.writeIndicesBufferData(meshObject.geometry.indices);
 
         // 渲染
         this.gl.drawElements(
@@ -271,8 +273,8 @@ class Renderer {
           meshObject.geometry.indices.length,
           this.gl.UNSIGNED_BYTE,
           0
-        )
-        return
+        );
+        return;
       }
 
       // 渲染
@@ -280,18 +282,18 @@ class Renderer {
         this.gl.TRIANGLES,
         0,
         meshObject.geometry.vertices.length / 3
-      )
-    })
+      );
+    });
   }
 
   renderLoop(callBack) {
     function animate() {
-      requestAnimationFrame(animate)
+      requestAnimationFrame(animate);
 
-      callBack()
+      callBack();
     }
-    animate()
+    animate();
   }
 }
 
-export { Renderer }
+export { Renderer };
