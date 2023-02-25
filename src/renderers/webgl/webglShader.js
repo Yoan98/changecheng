@@ -1,9 +1,36 @@
 class WebglShader {
-  constructor(gl, vertex, fragment) {
+  constructor(gl) {
     this._gl = gl
 
-    this.vertexShader = this._createShader(vertex, gl.VERTEX_SHADER)
-    this.fragmentShader = this._createShader(fragment, gl.FRAGMENT_SHADER)
+    // shader缓存，保证每种材质只生成一次
+    this.shaderMap = {}
+  }
+
+  getShader(meshObject) {
+    const { vertex, fragment } = meshObject.shader
+
+    const shaderId = meshObject.material.shaderId
+    let glShader = this.shaderMap[shaderId]
+
+    if (glShader) {
+      // 有缓存
+      return glShader
+    }
+
+    const vertexShader = this._createShader(vertex, this._gl.VERTEX_SHADER)
+    const fragmentShader = this._createShader(
+      fragment,
+      this._gl.FRAGMENT_SHADER
+    )
+
+    glShader = {
+      vertexShader,
+      fragmentShader,
+    }
+
+    this.shaderMap[shaderId] = glShader
+
+    return glShader
   }
 
   _createShader(shaderData, glShaderType) {

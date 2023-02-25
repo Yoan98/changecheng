@@ -24,7 +24,6 @@ const circleObject = creator.createTest(material)
 // const circleObject = creator.createSphere({},material)
 
 // circleObject.position.set(0,0,0)
-
 scene.add(circleObject)
 scene.add(light)
 

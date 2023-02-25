@@ -1,7 +1,7 @@
-import * as stander from './lib/Phone.glsl'
+import * as phone from './lib/Phone.glsl'
 
 const SHADER_MAP = {
-  stander,
+  phone,
 }
 
 export { SHADER_MAP }

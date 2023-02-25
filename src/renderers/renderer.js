@@ -21,9 +21,11 @@ class Renderer {
   }
 
   initGlContext(gl) {
-    this._program = new WebglProgram(gl)
+    this._programMana = new WebglProgram(gl)
 
     this._bindState = new WebglBindState(gl)
+
+    this._shaderMana = new WebglShader(gl)
 
     this.gl.enable(gl.DEPTH_TEST)
   }
@@ -45,10 +47,8 @@ class Renderer {
 
     const { vertex, fragment } = SHADER_MAP[material.shaderId]
 
-    meshObject.shader = {
-      vertex,
-      fragment,
-    }
+    meshObject.shader.vertex = vertex
+    meshObject.shader.fragment = fragment
   }
   fetchAttributeLocations(gl, program) {
     const attributes = {}
@@ -199,6 +199,9 @@ class Renderer {
     this.gl.clearColor(0, 0, 0, 1)
     this.gl.clear(this.gl.COLOR_BUFFER_BIT)
 
+    this.curRenderObjects = []
+    this.curRenderLights = []
+
     // 处理场景中的所有对象,进行相应的初始化，便于后面操作
     // 后期优化过滤一些不需要显示的对象
     scene.children.forEach((child) => {
@@ -218,24 +221,22 @@ class Renderer {
     // 注：一个对象对应一个program 一个shader 一个buffer 一次渲染
 
     this.curRenderObjects.forEach((meshObject) => {
+      // 缓存shader与program，优化
+
       // 生成顶点与片元着色器字符串
       this.generateShader(meshObject)
 
-      const shader = new WebglShader(
-        this.gl,
-        meshObject.shader.vertex,
-        meshObject.shader.fragment
-      )
+      const glShader = this._shaderMana.getShader(meshObject)
 
       // console.log(meshObject)
 
-      if (shader.vertexShader === null || shader.fragmentShader === null) {
+      if (glShader.vertexShader === null || glShader.fragmentShader === null) {
         console.error('Compile shader error')
         return
       }
 
       // 传递shader对象，应用到program中
-      const glProgram = this._program.getProgram(shader)
+      const glProgram = this._programMana.getProgram(meshObject, glShader)
 
       if (glProgram === null) {
         console.error('Create program error')
@@ -245,7 +246,7 @@ class Renderer {
       // 调用gl.getProgramParameter，获取该项目中所有attribute shader变量，生成一个对象attribute(包含buffer数据)
       const attributes = this.fetchAttributeLocations(this.gl, glProgram)
 
-      // 调用gl.getProgramParameter，获取该项目中所有uniform shader变量，生成一个对象attribute(包含buffer数据)
+      // 调用gl.getProgramParameter，获取该项目中所有uniform shader变量，生成一个对象attribute
       const uniforms = this.fetchUniformLocations(this.gl, glProgram)
 
       // console.log(attributes)

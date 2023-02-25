@@ -28,10 +28,9 @@ class Mesh extends ObjectBase {
     for (let key in geometryInfo) {
       if (key === 'indices') {
         geometryInfo[key] = new Uint8Array(geometryInfo[key])
-      }else{
+      } else {
         geometryInfo[key] = new Float32Array(geometryInfo[key])
       }
-
     }
 
     this.geometry = geometryInfo

@@ -1,8 +1,6 @@
 class WebglBindState {
-  constructor(gl, program) {
+  constructor(gl) {
     this._gl = gl
-
-    this._program = program
   }
 
   // 将顶点的所有数据写入缓冲区，并关联到着色器中的变量

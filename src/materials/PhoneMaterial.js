@@ -2,7 +2,7 @@ import { Color } from '../math/Color'
 
 class PhoneMaterial {
   constructor() {
-    this.shaderId = 'stander'
+    this.shaderId = 'phone'
 
     // 漫反射系数
     this.color = new Color(1, 0, 0)
