@@ -6,28 +6,41 @@ const canvas = document.getElementById("renderCanvas");
 const scene = new CHANGECHENG.Scene();
 
 const light = new CHANGECHENG.DirectionLight();
-light.position.set(10, 10, 10);
+light.position.set(10, 13, 10);
+scene.add(light);
 
 const camera = new CHANGECHENG.PerspectiveCamera(
   30,
   canvas.width / canvas.height,
   1,
-  200
+  1000
 );
-camera.position.set(0, 1, 10);
+camera.position.set(0, 1, 8);
 
 const creator = new CHANGECHENG.Creator();
 
-const material = new CHANGECHENG.PhoneMaterial({
-  envColor: new CHANGECHENG.Color(0.4, 0.4, 0.4),
+const planeMaterial = new CHANGECHENG.PhoneMaterial({
+  envColor: new CHANGECHENG.Color(0, 0, 0),
 });
 
-// const circleObject = creator.createTest(material)
-const circleObject = creator.createPlane({}, material);
+const boxMaterial = new CHANGECHENG.PhoneMaterial({
+  envColor: new CHANGECHENG.Color(0, 0, 0),
+  color: new CHANGECHENG.Color(1, 0, 0),
+});
 
-// circleObject.position.set(0,0,0)
-scene.add(circleObject);
-scene.add(light);
+const plane = creator.createPlane(
+  {
+    width: 10,
+    height: 10,
+  },
+  planeMaterial
+);
+plane.position.set(0, -1, 0);
+// plane.rotateX(Math.PI / 2);
+scene.add(plane);
+
+const box = creator.createBox({}, boxMaterial);
+// scene.add(box);
 
 const renderer = new CHANGECHENG.Renderer(canvas);
 
@@ -48,11 +61,12 @@ gsap.to(rotateObj, {
 });
 
 renderer.renderLoop(() => {
-  circleObject.rotateY(rotateObj.props);
+  plane.rotateX(rotateObj.props);
+  // box.rotateY(rotateObj.props);
 
   renderer.render(scene, camera);
 });
 
-// circleObject.rotateY(Math.PI * 1.7)
+// plane.rotateY(Math.PI * 1.7)
 
-// renderer.render(scene, camera)
+// renderer.render(scene, camera);
