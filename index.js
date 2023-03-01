@@ -1,32 +1,38 @@
-import * as CHANGECHENG from "./src/changcheng";
-import gsap from "gsap";
+import * as CHANGECHENG from './src/changcheng'
+import gsap from 'gsap'
+import url from './src/textures/earth_atmos_2048.jpg'
 
-const canvas = document.getElementById("renderCanvas");
+const canvas = document.getElementById('renderCanvas')
 
-const scene = new CHANGECHENG.Scene();
+const scene = new CHANGECHENG.Scene()
 
-const light = new CHANGECHENG.DirectionLight();
-light.position.set(10, 13, 10);
-scene.add(light);
+const light = new CHANGECHENG.DirectionLight()
+light.position.set(10, 13, 10)
+scene.add(light)
 
 const camera = new CHANGECHENG.PerspectiveCamera(
   30,
   canvas.width / canvas.height,
   1,
   1000
-);
-camera.position.set(0, 1, 8);
+)
+camera.position.set(0, 1, 8)
 
-const creator = new CHANGECHENG.Creator();
+const creator = new CHANGECHENG.Creator()
 
 const planeMaterial = new CHANGECHENG.PhoneMaterial({
   envColor: new CHANGECHENG.Color(0, 0, 0),
-});
+})
 
 const boxMaterial = new CHANGECHENG.PhoneMaterial({
   envColor: new CHANGECHENG.Color(0, 0, 0),
   color: new CHANGECHENG.Color(1, 0, 0),
-});
+})
+const circleMaterial = new CHANGECHENG.PhoneMaterial({
+  envColor: new CHANGECHENG.Color(0, 0, 0),
+  color: new CHANGECHENG.Color(1, 0, 0),
+  map: url,
+})
 
 const plane = creator.createPlane(
   {
@@ -34,21 +40,24 @@ const plane = creator.createPlane(
     height: 10,
   },
   planeMaterial
-);
-plane.position.set(0, -1, 0);
-// plane.rotateX(Math.PI / 2);
-scene.add(plane);
+)
+plane.position.set(0, -1, 0)
+plane.rotateX(-Math.PI / 2)
+// scene.add(plane)
 
-const box = creator.createBox({}, boxMaterial);
-// scene.add(box);
+// const box = creator.createBox({}, boxMaterial)
+// scene.add(box)
 
-const renderer = new CHANGECHENG.Renderer(canvas);
+const circle = creator.createSphere({}, circleMaterial)
+scene.add(circle)
 
-const rotateObj = { props: 0 };
+const renderer = new CHANGECHENG.Renderer(canvas)
+
+const rotateObj = { props: 0 }
 gsap.to(rotateObj, {
   duration: 5,
   props: Math.PI * 2,
-  ease: "none",
+  ease: 'none',
   repeat: -1,
   repeatDelay: 0,
   yoyo: false,
@@ -56,17 +65,17 @@ gsap.to(rotateObj, {
     // console.log(rotateObj.props)
   },
   onComplete: function (a, b, c) {
-    console.log("complete");
+    console.log('complete')
   },
-});
+})
 
-renderer.renderLoop(() => {
-  plane.rotateX(rotateObj.props);
-  // box.rotateY(rotateObj.props);
+// renderer.renderLoop(() => {
+//   // box.rotateY(rotateObj.props)
+//   // circle.rotateY(rotateObj.props)
 
-  renderer.render(scene, camera);
-});
+//   renderer.render(scene, camera)
+// })
 
 // plane.rotateY(Math.PI * 1.7)
 
-// renderer.render(scene, camera);
+renderer.render(scene, camera)

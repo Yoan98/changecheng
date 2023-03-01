@@ -47,8 +47,10 @@ class WebglBindState {
         this._gl.uniformMatrix4fv(location, false, value.uniformMatrix4fv)
       } else if (type === this._gl.FLOAT_VEC3 || type === this._gl.INT_VEC3) {
         this._gl.uniform3fv(location, value.uniform3fv)
-      } else if (type === this._gl.FLOAT || type === this._gl.INT) {
+      } else if (type === this._gl.FLOAT) {
         this._gl.uniform1f(location, value.uniform1f)
+      } else if (type === this._gl.SAMPLER_2D || type === this._gl.INT) {
+        this._gl.uniform1i(location, value.uniform1i)
       }
     }
   }
