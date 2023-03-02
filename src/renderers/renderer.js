@@ -31,6 +31,8 @@ class Renderer {
     this._textureMana = new WebglTexture(gl)
 
     this.gl.enable(gl.DEPTH_TEST)
+
+    // this.gl.enable(gl.CULL_FACE)
   }
 
   getContext(canvas, contextAttributes = {}) {
@@ -232,9 +234,13 @@ class Renderer {
   render(scene, camera) {
     this.gl.clearColor(0, 0, 0, 1)
     this.gl.clear(this.gl.COLOR_BUFFER_BIT)
+    this.gl.clear(this.gl.DEPTH_BUFFER_BIT)
 
     this.curRenderObjects = []
     this.curRenderLights = []
+
+    // 用帧缓冲区渲染一遍所有对象得出阴影贴图
+    // 再切换回颜色缓冲区正常的渲染一遍所有对象
 
     // 处理场景中的所有对象,进行相应的初始化，便于后面操作
     // 后期优化过滤一些不需要显示的对象
