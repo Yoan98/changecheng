@@ -255,8 +255,10 @@ class Renderer {
     // 注：一个对象对应一个program 一个shader 一个buffer 一次渲染
 
     this.curRenderObjects.forEach((meshObject) => {
-      // 缓存shader与program，优化
-
+      if (meshObject.material.map && !meshObject.material.map.complete) {
+        // 如果该渲染对象存在贴图 且图片未加载好 则不渲染
+        return
+      }
       // 生成顶点与片元着色器字符串
       this.generateShader(meshObject)
 
@@ -296,11 +298,9 @@ class Renderer {
       this._bindState.writeDataToShader(attributes, uniforms)
 
       if (meshObject.material.map) {
-        // 如果存在贴图 则需要先加载贴图再渲染
-        // 生成texture
-        this._textureMana.initTexture(meshObject, this.draw, this)
-
-        return
+        // 如果存在贴图
+        // 则需要先加载贴图再渲染
+        this._textureMana.loadTexture(meshObject)
       }
 
       this.draw(meshObject)

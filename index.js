@@ -1,8 +1,10 @@
-import * as CHANGECHENG from './src/changcheng'
+import url from './src/assets/earth_atmos_2048.jpg'
+import * as CHANGECHENG from './src/changcheng.js'
 import gsap from 'gsap'
-import url from './src/textures/earth_atmos_2048.jpg'
 
 const canvas = document.getElementById('renderCanvas')
+
+const textureLoader = new CHANGECHENG.TextureLoader()
 
 const scene = new CHANGECHENG.Scene()
 
@@ -31,7 +33,7 @@ const boxMaterial = new CHANGECHENG.PhoneMaterial({
 const circleMaterial = new CHANGECHENG.PhoneMaterial({
   envColor: new CHANGECHENG.Color(0, 0, 0),
   color: new CHANGECHENG.Color(1, 0, 0),
-  map: url,
+  map: textureLoader.load(url),
 })
 
 const plane = creator.createPlane(
@@ -43,7 +45,7 @@ const plane = creator.createPlane(
 )
 plane.position.set(0, -1, 0)
 plane.rotateX(-Math.PI / 2)
-// scene.add(plane)
+scene.add(plane)
 
 // const box = creator.createBox({}, boxMaterial)
 // scene.add(box)
@@ -69,13 +71,13 @@ gsap.to(rotateObj, {
   },
 })
 
-// renderer.renderLoop(() => {
-//   // box.rotateY(rotateObj.props)
-//   // circle.rotateY(rotateObj.props)
+renderer.renderLoop(() => {
+  // box.rotateY(rotateObj.props)
+  circle.rotateY(rotateObj.props)
 
-//   renderer.render(scene, camera)
-// })
+  renderer.render(scene, camera)
+})
 
 // plane.rotateY(Math.PI * 1.7)
 
-renderer.render(scene, camera)
+// renderer.render(scene, camera)

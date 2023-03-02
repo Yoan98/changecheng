@@ -1,34 +1,33 @@
 class WebglTexture {
   constructor(gl) {
     this._gl = gl
+
+    this.textureWeakMap = new WeakMap()
   }
 
-  initTexture(meshObject, drawCB, render) {
-    const glTexture = this._gl.createTexture()
+  loadTexture(meshObject) {
+    let glTexture = this.textureWeakMap.get(meshObject)
+
+    if (glTexture) {
+      return
+    }
+
+    glTexture = this._gl.createTexture()
     if (!glTexture) {
       console.log('Failed to create the texture object')
       return null
     }
 
-    const image = new Image()
+    this.textureWeakMap.set(meshObject, glTexture)
 
-    image.onload = () => {
-      this.loadTexture(glTexture, image)
+    const image = meshObject.material.map
 
-      // 渲染回调的调用
-      drawCB.call(render, meshObject)
-    }
-
-    image.src = meshObject.material.map
-  }
-
-  loadTexture(texture, image) {
     this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1) // Flip the image's y-axis
 
     this._gl.activeTexture(this._gl.TEXTURE0)
 
     // Bind the texture object to the target
-    this._gl.bindTexture(this._gl.TEXTURE_2D, texture)
+    this._gl.bindTexture(this._gl.TEXTURE_2D, glTexture)
 
     // Set texture parameters
     this._gl.texParameteri(

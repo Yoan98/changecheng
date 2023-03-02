@@ -2,15 +2,15 @@ class WebglShader {
   constructor(gl) {
     this._gl = gl
 
-    // shader缓存，保证每种材质只生成一次
-    this.shaderMap = {}
+    // shader缓存，保证每个渲染对象一个shader
+    this.shaderWeakMap = new WeakMap()
   }
 
   getShader(meshObject) {
     const { vertex, fragment } = meshObject.shader
 
-    const shaderId = meshObject.material.shaderId
-    let glShader = this.shaderMap[shaderId]
+    // 不能以shaderid来缓存，shader字符是动态的
+    let glShader = this.shaderWeakMap.get(meshObject)
 
     if (glShader) {
       // 有缓存
@@ -28,7 +28,7 @@ class WebglShader {
       fragmentShader,
     }
 
-    this.shaderMap[shaderId] = glShader
+    this.shaderWeakMap.set(meshObject, glShader)
 
     return glShader
   }
