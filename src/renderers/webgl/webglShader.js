@@ -33,6 +33,7 @@ class WebglShader {
     return glShader
   }
 
+  getShadowShader() {}
   _createShader(shaderData, glShaderType) {
     const shader = this._gl.createShader(glShaderType)
     if (shader == null) {

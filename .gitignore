@@ -7,3 +7,5 @@ node_modules/
 dist/
 .vscode
 .cache/
+parcel-cache/
+.parcel-cache/data.mdb

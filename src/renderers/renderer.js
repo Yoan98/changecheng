@@ -5,7 +5,9 @@ import { WebglTexture } from './webgl/WebglTexture'
 import { Matrix4 } from '../math/Matrix4.js'
 import { SHADER_MAP } from '../shaders/map'
 class Renderer {
-  constructor(canvas) {
+  constructor(canvas, config) {
+    this._config = config
+
     this.gl = this.getContext(canvas, {
       // antialias: true,
     })
@@ -16,6 +18,7 @@ class Renderer {
 
     this.curRenderLights = []
     this.curRenderObjects = []
+    this.curShadowObjects = []
     this.curCamera = {}
 
     this.initGlContext(this.gl)
@@ -26,7 +29,7 @@ class Renderer {
 
     this._bindState = new WebglBindState(gl)
 
-    this._shaderMana = new WebglShader(gl)
+    this._shaderMana = new WebglShader(gl, this._config)
 
     this._textureMana = new WebglTexture(gl)
 
@@ -237,6 +240,7 @@ class Renderer {
     this.gl.clear(this.gl.DEPTH_BUFFER_BIT)
 
     this.curRenderObjects = []
+    this.curShadowObjects = []
     this.curRenderLights = []
 
     // 用帧缓冲区渲染一遍所有对象得出阴影贴图
@@ -247,6 +251,7 @@ class Renderer {
     scene.children.forEach((child) => {
       if (child.type === 'mesh') {
         this.curRenderObjects.push(child)
+        this.curShadowObjects.push(child)
       } else if (child.type === 'light') {
         this.curRenderLights.push(child)
       } else if (child.type === 'camera') {
@@ -260,6 +265,10 @@ class Renderer {
 
     // 注：一个对象对应一个program 一个shader 一个buffer 一次渲染
 
+    // 帧缓冲区跑阴影渲染
+    this.curRenderObjects.forEach((meshObject) => {})
+
+    // 正常物体在颜色缓冲区渲染
     this.curRenderObjects.forEach((meshObject) => {
       if (meshObject.material.map && !meshObject.material.map.complete) {
         // 如果该渲染对象存在贴图 且图片未加载好 则不渲染
