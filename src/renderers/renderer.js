@@ -1,12 +1,19 @@
 import { WebglProgram } from './webgl/WebglProgram'
 import { WebglShader } from './webgl/WebglShader'
+import { WebglFrameBuffer } from './webgl/WebglFrameBuffer'
 import { WebglBindState } from './webgl/WebglBindState'
 import { WebglTexture } from './webgl/WebglTexture'
 import { Matrix4 } from '../math/Matrix4.js'
 import { SHADER_MAP } from '../shaders/map'
 class Renderer {
   constructor(canvas, config) {
-    this._config = config
+    this._config = {
+      OFFSCREEN_WIDTH: 2048,
+      OFFSCREEN_HEIGHT: 2048,
+      ...config,
+    }
+
+    this.canvas = canvas
 
     this.gl = this.getContext(canvas, {
       // antialias: true,
@@ -18,7 +25,6 @@ class Renderer {
 
     this.curRenderLights = []
     this.curRenderObjects = []
-    this.curShadowObjects = []
     this.curCamera = {}
 
     this.initGlContext(this.gl)
@@ -32,6 +38,8 @@ class Renderer {
     this._shaderMana = new WebglShader(gl, this._config)
 
     this._textureMana = new WebglTexture(gl)
+
+    this._frameBufferMana = new WebglFrameBuffer(gl, this._config)
 
     this.gl.enable(gl.DEPTH_TEST)
 
@@ -60,7 +68,7 @@ class Renderer {
 
     const replaceMap = {
       diffuse_color: {
-        mapColor: `vec4 diffuse_color = texture2D(u_Sampler0, v_TexCoord);`,
+        mapColor: `vec4 diffuse_color = texture2D(u_SamplerDiffuse, v_TexCoord);`,
         veterColor: `vec4 diffuse_color = v_Color;`,
       },
     }
@@ -209,6 +217,26 @@ class Renderer {
         mvpMatrix.multiply(meshObject.modelMatrix)
 
         value.uniformMatrix4fv = new Float32Array(mvpMatrix.elements)
+      } else if (name === 'u_MvpMatrixFromLight') {
+        // 计算灯光视角的投影矩阵
+        const mvpMatrix = new Matrix4()
+        const lookAtMatrix = new Matrix4().setLookAt(
+          lights[0].position,
+          lights[0].target,
+          lights[0].up
+        )
+        const perspectiveMatrix = new Matrix4().setPerspective(
+          70.0,
+          this._config.OFFSCREEN_WIDTH / this._config.OFFSCREEN_HEIGHT,
+          1.0,
+          1000
+        )
+
+        mvpMatrix.set(...perspectiveMatrix.elements)
+        mvpMatrix.multiply(lookAtMatrix)
+        mvpMatrix.multiply(meshObject.modelMatrix)
+
+        value.uniformMatrix4fv = new Float32Array(mvpMatrix.elements)
       } else if (name === 'u_NormalMatrix') {
         // 计算法线矩阵，用于物体移动后，法线的变动。先求逆再转置
         const normalMatrix = new Matrix4()
@@ -223,10 +251,14 @@ class Renderer {
         )
       } else if (name === 'u_SpecularPlot') {
         value.uniform1i = Number(meshObject.material.specularPlot)
-      } else if (name.indexOf('u_Sampler') !== -1) {
-        // 设置贴图变量
-        value.uniform1i = Number(name.charAt(name.length - 1))
+      } else if (name === 'u_SamplerDiffuse') {
+        // 设置漫反射贴图变量
+        value.uniform1i = Number(0)
+      } else if (name === 'u_ShadowMap') {
+        // 设置阴影贴图变量
+        value.uniform1i = Number(7)
       }
+
       return value
     }
 
@@ -234,41 +266,54 @@ class Renderer {
       uniforms[name].value = getValueByType(name)
     }
   }
-  render(scene, camera) {
-    this.gl.clearColor(0, 0, 0, 1)
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT)
-    this.gl.clear(this.gl.DEPTH_BUFFER_BIT)
+  // 帧缓冲区跑阴影渲染
+  renderShadowMap(camera) {
+    const glShader = this._shaderMana.getShadowShader()
 
-    this.curRenderObjects = []
-    this.curShadowObjects = []
-    this.curRenderLights = []
+    const glProgram = this._programMana.getShadowProgram(glShader)
 
-    // 用帧缓冲区渲染一遍所有对象得出阴影贴图
-    // 再切换回颜色缓冲区正常的渲染一遍所有对象
+    const glFramebuffer = this._frameBufferMana.getFramebuffer()
 
-    // 处理场景中的所有对象,进行相应的初始化，便于后面操作
-    // 后期优化过滤一些不需要显示的对象
-    scene.children.forEach((child) => {
-      if (child.type === 'mesh') {
-        this.curRenderObjects.push(child)
-        this.curShadowObjects.push(child)
-      } else if (child.type === 'light') {
-        this.curRenderLights.push(child)
-      } else if (child.type === 'camera') {
-        this.curCamera = child
-      }
+    // 设置当前使用7号贴图，且为阴影贴图（目前该帧缓冲区只用于阴影贴图）
+    this.gl.activeTexture(this.gl.TEXTURE7)
+    this.gl.bindTexture(this.gl.TEXTURE_2D, glFramebuffer.texture)
 
-      child.updateMatrix()
+    // 切换当前渲染使用帧缓冲区渲染（不会渲染到页面上）
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, glFramebuffer)
+    this.gl.viewport(
+      0,
+      0,
+      this._config.OFFSCREEN_WIDTH,
+      this._config.OFFSCREEN_HEIGHT
+    )
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
+
+    this.gl.useProgram(glProgram)
+
+    this.curRenderObjects.forEach((meshObject) => {
+      const attributes = this.fetchAttributeLocations(this.gl, glProgram)
+
+      const uniforms = this.fetchUniformLocations(this.gl, glProgram)
+
+      // 配置attributes数据，方便后续应用变量到shader
+      this.attributeSetting(attributes, meshObject, this.curRenderLights)
+
+      // 配置uniforms数据，方便后续应用变量到shader
+      this.uniformSetting(uniforms, meshObject, this.curRenderLights, camera)
+
+      // 将数据写入缓冲区，同时应用到shader变量中
+      this._bindState.writeDataToShader(attributes, uniforms)
+
+      this.draw(meshObject)
     })
 
-    camera.updateMatrix()
+    // 切换回颜色缓冲区渲染（会渲染到页面上）
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null)
+    this.gl.viewport(0, 0, this.canvas.width, this.canvas.height)
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
+  }
 
-    // 注：一个对象对应一个program 一个shader 一个buffer 一次渲染
-
-    // 帧缓冲区跑阴影渲染
-    this.curRenderObjects.forEach((meshObject) => {})
-
-    // 正常物体在颜色缓冲区渲染
+  renderObjects(camera) {
     this.curRenderObjects.forEach((meshObject) => {
       if (meshObject.material.map && !meshObject.material.map.complete) {
         // 如果该渲染对象存在贴图 且图片未加载好 则不渲染
@@ -281,13 +326,9 @@ class Renderer {
 
       // console.log(meshObject)
 
-      if (glShader.vertexShader === null || glShader.fragmentShader === null) {
-        console.error('Compile shader error')
-        return
-      }
-
       // 传递shader对象，应用到program中
       const glProgram = this._programMana.getProgram(meshObject, glShader)
+      this.gl.useProgram(glProgram)
 
       if (glProgram === null) {
         console.error('Create program error')
@@ -320,6 +361,40 @@ class Renderer {
 
       this.draw(meshObject)
     })
+  }
+  render(scene, camera) {
+    this.gl.clearColor(0, 0, 0, 1)
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT)
+    this.gl.clear(this.gl.DEPTH_BUFFER_BIT)
+
+    this.curRenderObjects = []
+    this.curRenderLights = []
+
+    // 用帧缓冲区渲染一遍所有对象得出阴影贴图
+    // 再切换回颜色缓冲区正常的渲染一遍所有对象
+
+    // 处理场景中的所有对象,进行相应的初始化，便于后面操作
+    // 后期优化过滤一些不需要显示的对象
+    scene.children.forEach((child) => {
+      if (child.type === 'mesh') {
+        this.curRenderObjects.push(child)
+      } else if (child.type === 'light') {
+        this.curRenderLights.push(child)
+      } else if (child.type === 'camera') {
+        this.curCamera = child
+      }
+
+      child.updateMatrix()
+    })
+
+    camera.updateMatrix()
+
+    // 绘制阴影贴图
+    this.renderShadowMap(camera)
+
+    // 注：一个对象对应一个program 一个shader 一个buffer 一次渲染
+    // 正常物体在颜色缓冲区渲染
+    this.renderObjects(camera)
   }
 
   draw(meshObject) {

@@ -7,6 +7,9 @@ class WebglProgram {
 
     // 缓存program下的shader，保证一个program一个shader，用于判断shader的更新
     this.shaderWeakMap = new WeakMap()
+
+    // 阴影的program
+    this.shadowProgram = null
   }
 
   getProgram(meshObject, glShader) {
@@ -18,7 +21,6 @@ class WebglProgram {
       if (cacheGlShader && cacheGlShader === glShader) {
         // 也缓存了shader 且shader未更新
 
-        this._gl.useProgram(glProgram)
         return glProgram
       }
 
@@ -28,15 +30,38 @@ class WebglProgram {
 
       this._gl.linkProgram(glProgram)
 
-      this._gl.useProgram(glProgram)
-
       this.shaderWeakMap.delete(glProgram)
       this.shaderWeakMap.set(glProgram, glShader)
+
+      return glProgram
     }
 
     // 没有缓存的program，则新生成
 
-    glProgram = this._gl.createProgram()
+    glProgram = this._createProgram(glShader)
+
+    this.programWeakMap.set(meshObject, glProgram)
+    this.shaderWeakMap.set(glProgram, glShader)
+
+    return glProgram
+  }
+
+  getShadowProgram(glShader) {
+    let glProgram = this.shadowProgram
+
+    if (glProgram) {
+      return glProgram
+    }
+
+    glProgram = this._createProgram(glShader)
+
+    this.shadowProgram = glProgram
+
+    return glProgram
+  }
+
+  _createProgram(glShader) {
+    const glProgram = this._gl.createProgram()
 
     this._gl.attachShader(glProgram, glShader.vertexShader)
     this._gl.attachShader(glProgram, glShader.fragmentShader)
@@ -54,11 +79,6 @@ class WebglProgram {
 
       return null
     }
-    this._gl.useProgram(glProgram)
-
-    this.programWeakMap.set(meshObject, glProgram)
-    this.shaderWeakMap.set(glProgram, glShader)
-
     return glProgram
   }
 }

@@ -2,6 +2,7 @@
 
 export const vertex = `
   uniform mat4 u_MvpMatrix;
+  uniform mat4 u_MvpMatrixFromLight;
 
   attribute vec4 a_Position;
   attribute vec4 a_Color;
@@ -12,10 +13,12 @@ export const vertex = `
   varying vec4 v_Color;
   varying vec4 v_Normal;
   varying vec2 v_TexCoord;
+  varying vec4 v_PositionFromLight;
 
   void main() {
     gl_Position = u_MvpMatrix * a_Position;
 
+    v_PositionFromLight = u_MvpMatrixFromLight * a_Position;
     v_Color = a_Color;
     v_Position = a_Position;
     v_Normal = a_Normal;
@@ -28,7 +31,8 @@ export const fragment = `
   precision mediump float;
   #endif
 
-  uniform sampler2D u_Sampler0;
+  uniform sampler2D u_SamplerDiffuse;
+  uniform sampler2D u_ShadowMap;
 
   uniform mat4 u_ModelMatrix;
   uniform mat4 u_NormalMatrix;
@@ -48,10 +52,22 @@ export const fragment = `
   varying vec4 v_Position;
   varying vec4 v_Normal;
   varying vec2 v_TexCoord;
+  varying vec4 v_PositionFromLight;
+
+  float unpackDepth(const in vec4 rgbaDepth) {
+    const vec4 bitShift = vec4(1.0, 1.0/256.0, 1.0/(256.0*256.0), 1.0/(256.0*256.0*256.0));
+    float depth = dot(rgbaDepth, bitShift);
+    return depth;
+  }
 
   void main() {
 
     #include <diffuse_color>
+
+    vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w)/2.0 + 0.5;
+    vec4 rgbaDepth = texture2D(u_ShadowMap, shadowCoord.xy);
+    float depth = unpackDepth(rgbaDepth);
+    float visibility = (shadowCoord.z > depth + 0.0015) ? 0.7 : 1.0;
 
     vec3 halfVec = u_EyePosition + u_LightPosition;
 
@@ -72,7 +88,9 @@ export const fragment = `
 
     vec3 ambient = u_AmbientLight * diffuse_color.rgb;
 
-    gl_FragColor = vec4(diffuse + specular + ambient, diffuse_color.a);
+    vec3 fragColor = diffuse + specular + ambient;
+
+    gl_FragColor = vec4(fragColor * visibility, diffuse_color.a);
   }
 
   `

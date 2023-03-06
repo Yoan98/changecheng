@@ -1,5 +1,5 @@
 import { Vector3 } from './Vector3.js';
-
+import * as MathUtils from '../math/MathUtils.js'
 class Matrix4 {
 
 	constructor() {
@@ -788,6 +788,20 @@ class Matrix4 {
 
 		return this;
 
+	}
+
+	setPerspective(fov = 50, aspect = 1, near = 0.1, far = 2000,zoom=1){
+    let top = (near * Math.tan(MathUtils.DEG2RAD * 0.5 * fov)) / zoom
+    let height = 2 * top
+    let width = aspect * height
+    let left = -0.5 * width
+
+		return this.makePerspective(left,
+      left + width,
+      top,
+      top - height,
+      near,
+      far)
 	}
 
 	makeOrthographic( left, right, top, bottom, near, far ) {

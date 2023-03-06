@@ -5,6 +5,7 @@ class WebglTexture {
     this.textureWeakMap = new WeakMap()
   }
 
+  // 待处理多贴图问题
   loadTexture(meshObject) {
     let glTexture = this.textureWeakMap.get(meshObject)
 

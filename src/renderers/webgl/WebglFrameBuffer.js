@@ -1,12 +1,19 @@
 // 帧缓冲区
 class WebglFrameBuffer {
-  constructor(gl, canvas) {
+  constructor(gl, config) {
     this._gl = gl
-    this._canvas = canvas
+    this._config = config
+
+    this.framebuffer = null
   }
 
   getFramebuffer() {
     let framebuffer, texture, depthBuffer
+
+    framebuffer = this.framebuffer
+    if (framebuffer) {
+      return framebuffer
+    }
 
     // Define the error handling function
     const error = function () {
@@ -34,8 +41,8 @@ class WebglFrameBuffer {
       this._gl.TEXTURE_2D,
       0,
       this._gl.RGBA,
-      this._canvas.width,
-      this._canvas.height,
+      this._config.OFFSCREEN_WIDTH,
+      this._config.OFFSCREEN_HEIGHT,
       0,
       this._gl.RGBA,
       this._gl.UNSIGNED_BYTE,
@@ -58,8 +65,8 @@ class WebglFrameBuffer {
     this._gl.renderbufferStorage(
       this._gl.RENDERBUFFER,
       this._gl.DEPTH_COMPONENT16,
-      this._canvas.width,
-      this._canvas.height
+      this._config.OFFSCREEN_WIDTH,
+      this._config.OFFSCREEN_HEIGHT
     )
 
     // Attach the texture and the renderbuffer object to the FBO
@@ -84,6 +91,8 @@ class WebglFrameBuffer {
       console.log('Frame buffer object is incomplete: ' + e.toString())
       return error()
     }
+
+    this.framebuffer = framebuffer
 
     // Unbind the buffer object
     this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null)

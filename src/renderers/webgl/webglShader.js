@@ -1,9 +1,17 @@
+import {
+  SHADOW_VSHADER_SOURCE,
+  SHADOW_FSHADER_SOURCE,
+} from '../../shaders/lib/Shadow.glsl'
 class WebglShader {
+  // 7号贴图专门用于阴影贴图
   constructor(gl) {
     this._gl = gl
 
     // shader缓存，保证每个渲染对象一个shader
     this.shaderWeakMap = new WeakMap()
+
+    // 阴影shader
+    this.shadowShader = null
   }
 
   getShader(meshObject) {
@@ -33,7 +41,31 @@ class WebglShader {
     return glShader
   }
 
-  getShadowShader() {}
+  getShadowShader() {
+    let glShader = this.shadowShader
+
+    if (glShader) {
+      return glShader
+    }
+
+    const vertexShader = this._createShader(
+      SHADOW_VSHADER_SOURCE,
+      this._gl.VERTEX_SHADER
+    )
+    const fragmentShader = this._createShader(
+      SHADOW_FSHADER_SOURCE,
+      this._gl.FRAGMENT_SHADER
+    )
+
+    glShader = {
+      vertexShader,
+      fragmentShader,
+    }
+
+    this.shadowShader = glShader
+
+    return glShader
+  }
   _createShader(shaderData, glShaderType) {
     const shader = this._gl.createShader(glShaderType)
     if (shader == null) {

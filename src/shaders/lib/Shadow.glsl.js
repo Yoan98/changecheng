@@ -1,8 +1,8 @@
 const SHADOW_VSHADER_SOURCE =
   'attribute vec4 a_Position;\n' +
-  'uniform mat4 u_MvpMatrix;\n' +
+  'uniform mat4 u_MvpMatrixFromLight;\n' +
   'void main() {\n' +
-  '  gl_Position = u_MvpMatrix * a_Position;\n' +
+  '  gl_Position = u_MvpMatrixFromLight * a_Position;\n' +
   '}\n'
 
 // Fragment shader program for generating a shadow map
