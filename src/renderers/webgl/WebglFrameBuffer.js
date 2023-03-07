@@ -51,9 +51,13 @@ class WebglFrameBuffer {
     this._gl.texParameteri(
       this._gl.TEXTURE_2D,
       this._gl.TEXTURE_MIN_FILTER,
-      this._gl.LINEAR
+      this._gl.NEAREST
     )
-    framebuffer.texture = texture // Store the texture object
+    this._gl.texParameteri(
+      this._gl.TEXTURE_2D,
+      this._gl.TEXTURE_MAG_FILTER,
+      this._gl.NEAREST
+    )
 
     // Create a renderbuffer object and Set its size and parameters
     depthBuffer = this._gl.createRenderbuffer() // Create a renderbuffer object
@@ -91,6 +95,8 @@ class WebglFrameBuffer {
       console.log('Frame buffer object is incomplete: ' + e.toString())
       return error()
     }
+
+    framebuffer.texture = texture // Store the texture object
 
     this.framebuffer = framebuffer
 

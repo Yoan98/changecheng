@@ -43,6 +43,8 @@ class Renderer {
 
     this.gl.enable(gl.DEPTH_TEST)
 
+    this.gl.clearColor(0, 0, 0, 1)
+
     // this.gl.enable(gl.CULL_FACE)
   }
 
@@ -301,6 +303,8 @@ class Renderer {
       // 配置uniforms数据，方便后续应用变量到shader
       this.uniformSetting(uniforms, meshObject, this.curRenderLights, camera)
 
+      // console.log(uniforms)
+      // console.log(attributes)
       // 将数据写入缓冲区，同时应用到shader变量中
       this._bindState.writeDataToShader(attributes, uniforms)
 
@@ -363,10 +367,7 @@ class Renderer {
     })
   }
   render(scene, camera) {
-    this.gl.clearColor(0, 0, 0, 1)
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT)
-    this.gl.clear(this.gl.DEPTH_BUFFER_BIT)
-
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
     this.curRenderObjects = []
     this.curRenderLights = []
 
@@ -390,7 +391,7 @@ class Renderer {
     camera.updateMatrix()
 
     // 绘制阴影贴图
-    this.renderShadowMap(camera)
+    // this.renderShadowMap(camera)
 
     // 注：一个对象对应一个program 一个shader 一个buffer 一次渲染
     // 正常物体在颜色缓冲区渲染

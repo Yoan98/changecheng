@@ -9,7 +9,7 @@ const textureLoader = new CHANGECHENG.TextureLoader()
 const scene = new CHANGECHENG.Scene()
 
 const light = new CHANGECHENG.DirectionLight()
-light.position.set(2, 4, 2)
+light.position.set(2, 3, -1)
 scene.add(light)
 
 const camera = new CHANGECHENG.PerspectiveCamera(
@@ -52,6 +52,7 @@ scene.add(box)
 
 const circle = creator.createSphere({}, circleMaterial)
 // scene.add(circle)
+// circle.position.set(2, 3, -1)
 
 const renderer = new CHANGECHENG.Renderer(canvas)
 
