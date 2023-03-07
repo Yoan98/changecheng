@@ -329,8 +329,10 @@ class Matrix4 {
 
 	// 设置试图矩阵，旋转矩阵*位移矩阵
 	setLookAt(eye, target, up)	{
-		// 原本threejs的lookat只计算了旋转矩阵
+		// 原本threejs的lookat只计算了旋转矩阵,且旋转矩阵算法未转置
 		this.lookAt(eye, target, up)
+
+		this.transpose()
 
 		this.translate(-eye.x,-eye.y,-eye.z)
 
@@ -803,6 +805,7 @@ class Matrix4 {
       near,
       far)
 	}
+
 
 	makeOrthographic( left, right, top, bottom, near, far ) {
 

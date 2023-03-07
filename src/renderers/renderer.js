@@ -4,6 +4,7 @@ import { WebglFrameBuffer } from './webgl/WebglFrameBuffer'
 import { WebglBindState } from './webgl/WebglBindState'
 import { WebglTexture } from './webgl/WebglTexture'
 import { Matrix4 } from '../math/Matrix4.js'
+import { Matrix4 as Matrix4t } from '../lib/cuon-matrix'
 import { SHADER_MAP } from '../shaders/map'
 class Renderer {
   constructor(canvas, config) {
@@ -227,11 +228,12 @@ class Renderer {
           lights[0].target,
           lights[0].up
         )
+
         const perspectiveMatrix = new Matrix4().setPerspective(
           70.0,
           this._config.OFFSCREEN_WIDTH / this._config.OFFSCREEN_HEIGHT,
           1.0,
-          1000
+          100
         )
 
         mvpMatrix.set(...perspectiveMatrix.elements)
@@ -345,14 +347,14 @@ class Renderer {
       // 调用gl.getProgramParameter，获取该项目中所有uniform shader变量，生成一个对象attribute
       const uniforms = this.fetchUniformLocations(this.gl, glProgram)
 
-      // console.log(attributes)
-      // console.log(uniforms)
-
       // 配置attributes数据，方便后续应用变量到shader
       this.attributeSetting(attributes, meshObject, this.curRenderLights)
 
       // 配置uniforms数据，方便后续应用变量到shader
       this.uniformSetting(uniforms, meshObject, this.curRenderLights, camera)
+
+      // console.log(attributes)
+      // console.log(uniforms)
 
       // 将数据写入缓冲区，同时应用到shader变量中
       this._bindState.writeDataToShader(attributes, uniforms)
@@ -391,7 +393,7 @@ class Renderer {
     camera.updateMatrix()
 
     // 绘制阴影贴图
-    // this.renderShadowMap(camera)
+    this.renderShadowMap(camera)
 
     // 注：一个对象对应一个program 一个shader 一个buffer 一次渲染
     // 正常物体在颜色缓冲区渲染

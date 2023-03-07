@@ -9,7 +9,7 @@ const textureLoader = new CHANGECHENG.TextureLoader()
 const scene = new CHANGECHENG.Scene()
 
 const light = new CHANGECHENG.DirectionLight()
-light.position.set(2, 3, -1)
+light.position.set(2, 3, 2)
 scene.add(light)
 
 const camera = new CHANGECHENG.PerspectiveCamera(
@@ -49,6 +49,7 @@ scene.add(plane)
 
 const box = creator.createBox({}, boxMaterial)
 scene.add(box)
+// box.position.set(-1, 0, 0)
 
 const circle = creator.createSphere({}, circleMaterial)
 // scene.add(circle)
@@ -72,13 +73,13 @@ gsap.to(rotateObj, {
   },
 })
 
-renderer.renderLoop(() => {
-  box.rotateY(rotateObj.props)
-  // circle.rotateY(rotateObj.props)
+// renderer.renderLoop(() => {
+//   box.rotateY(rotateObj.props)
+//   // circle.rotateY(rotateObj.props)
 
-  renderer.render(scene, camera)
-})
+//   renderer.render(scene, camera)
+// })
 
 // plane.rotateY(Math.PI * 1.7)
 
-// renderer.render(scene, camera)
+renderer.render(scene, camera)
