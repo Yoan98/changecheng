@@ -327,9 +327,11 @@ class Matrix4 {
 
 	}
 
-	// 设置试图矩阵，旋转矩阵*位移矩阵
+	// 设置视图矩阵，旋转矩阵*位移矩阵
 	setLookAt(eye, target, up)	{
-		// 原本threejs的lookat只计算了旋转矩阵,且旋转矩阵算法未转置
+		// 原本threejs的lookat只计算了旋转矩阵
+		// 且该旋转矩阵只代表物体旋转的含义，还需要求逆，才是视图矩阵中的旋转矩阵（因为物体是按相机相反方向旋转）
+		// 旋转矩阵的逆矩阵等于其转置矩阵
 		this.lookAt(eye, target, up)
 
 		this.transpose()

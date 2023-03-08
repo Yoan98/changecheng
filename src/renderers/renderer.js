@@ -230,10 +230,10 @@ class Renderer {
         )
 
         const perspectiveMatrix = new Matrix4().setPerspective(
-          70.0,
+          80.0,
           this._config.OFFSCREEN_WIDTH / this._config.OFFSCREEN_HEIGHT,
           1.0,
-          100
+          1000
         )
 
         mvpMatrix.set(...perspectiveMatrix.elements)
