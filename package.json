@@ -29,11 +29,17 @@
   "staticFiles": [
     {
       "staticPath":"./src/models",
-      "staticOutPath": "models"
+      "staticOutPath": "models",
+      "env": {
+        "NODE_ENV": "development"
+      }
     },
     {
       "staticPath":"./src/assets",
-      "staticOutPath": "assets"
+      "staticOutPath": "assets",
+      "env": {
+        "NODE_ENV": "development"
+      }
     }
   ]
 }
