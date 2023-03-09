@@ -1,21 +1,39 @@
 {
   "name": "changecheng",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./build/index.js",
+  "targets": {
+    "default": {
+      "distDir": "./build"
+    }
+  },
   "repository": "git@github.com:xiaoyuan98/changecheng.git",
   "author": "huangyuan <xiaoyuan98@126.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "parcel ./index.html",
+    "dev": "parcel ./src/index.html",
     "build": "parcel build ./src/changcheng.js"
   },
   "devDependencies": {
-    "eslint": "^8.7.0",
+    "@babel/core": "^7.21.0",
+    "@babel/eslint-parser": "^7.19.1",
+    "eslint": "^8.35.0",
     "parcel": "^2.8.3",
+    "parcel-reporter-static-files-copy": "^1.5.0",
     "prettier": "^2.5.1"
   },
   "dependencies": {
     "changcheng": "^1.0.0",
     "gsap": "^3.11.4"
-  }
+  },
+  "staticFiles": [
+    {
+      "staticPath":"./src/models",
+      "staticOutPath": "models"
+    },
+    {
+      "staticPath":"./src/assets",
+      "staticOutPath": "assets"
+    }
+  ]
 }

@@ -2,11 +2,11 @@
 precision mediump float;
 #endif
 
-vec3 u_LightPosition = vec3(0.5,.8,.1);
+vec3 u_LightPosition = vec3(0.5, .8, .1);
 
 vec3 u_LightColor = vec3(1.0);
 vec3 u_SpecularColor = vec3(1.0);
-vec3 diffuse_color = vec3(0.5,0,0);
+vec3 diffuse_color = vec3(0.5, 0, 0);
 vec3 u_AmbientLight = vec3(0);
 
 float u_LightIntensity = 1.0;
@@ -25,7 +25,6 @@ vec3 halfVecNor = normalize(halfVec);
 vec3 lightNor = normalize(u_LightPosition);
 
 void main() {
-
   vec3 normalNor = normalize(vec3(u_normalMatrix * v_normal));
 
   float nDotL = max(dot(lightNor, normalNor), 0.0);
@@ -37,9 +36,9 @@ void main() {
 
   vec3 diffuse = diffuse_color.rgb * u_LightColor * lightIntensByPos * nDotL;
 
-  vec3 specular = u_SpecularColor * lightIntensByPos * pow(nDotH,u_SpecularPlot);
+  vec3 specular = u_SpecularColor * lightIntensByPos * pow(nDotH, u_SpecularPlot);
 
   vec3 ambient = u_AmbientLight * diffuse_color.rgb;
 
-	gl_FragColor = vec4(diffuse + specular + ambient,1.0);
+  gl_FragColor = vec4(diffuse + specular + ambient, 1.0);
 }

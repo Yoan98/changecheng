@@ -1,10 +1,13 @@
-import url from './src/assets/earth_atmos_2048.jpg'
-import * as CHANGECHENG from './src/changcheng.js'
+import * as CHANGECHENG from './changcheng.js'
 import gsap from 'gsap'
 
 const canvas = document.getElementById('renderCanvas')
 
 const textureLoader = new CHANGECHENG.TextureLoader()
+
+const gltfLoader = new CHANGECHENG.GltfLoader()
+
+gltfLoader.load('./models/soldier.glb')
 
 const scene = new CHANGECHENG.Scene()
 
@@ -33,7 +36,7 @@ const boxMaterial = new CHANGECHENG.PhoneMaterial({
 const circleMaterial = new CHANGECHENG.PhoneMaterial({
   envColor: new CHANGECHENG.Color(0, 0, 0),
   color: new CHANGECHENG.Color(1, 0, 0),
-  map: textureLoader.load(url),
+  map: textureLoader.load('./assets/earth_atmos_2048.jpg'),
 })
 
 const plane = creator.createPlane(

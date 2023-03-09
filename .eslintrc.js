@@ -1,7 +1,9 @@
 module.exports = {
   root: true,
+  parser: '@babel/eslint-parser',
   parserOptions: {
     sourceType: 'module',
+    requireConfigFile: false,
   },
   env: {
     browser: true,
@@ -37,13 +39,6 @@ module.exports = {
       },
     ],
     semi: [2, 'never'],
-    'semi-spacing': [
-      2,
-      {
-        before: false,
-        after: true,
-      },
-    ],
     'space-before-function-paren': 0,
     'space-in-parens': [2, 'never'],
     'space-infix-ops': 2,
