@@ -353,7 +353,7 @@ class Renderer {
       // 配置uniforms数据，方便后续应用变量到shader
       this.uniformSetting(uniforms, meshObject, this.curRenderLights, camera)
 
-      // console.log(attributes)
+      console.log(attributes)
       // console.log(uniforms)
 
       // 将数据写入缓冲区，同时应用到shader变量中
